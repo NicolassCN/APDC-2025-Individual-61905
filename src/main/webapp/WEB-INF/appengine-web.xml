@@ -28,4 +28,8 @@
     <include path="/**.cur" expiration="1m" />  <!-- 1 minute, normal is 12h or more -->
   </static-files>
 
+  <application>root-app-453615-f3</application>
+  <version>1</version>
+  <threadsafe>true</threadsafe>
+
 </appengine-web-app>
