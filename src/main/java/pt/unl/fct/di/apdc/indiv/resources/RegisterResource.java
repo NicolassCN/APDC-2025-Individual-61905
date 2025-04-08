@@ -34,7 +34,6 @@ public class RegisterResource {
     public Response register(User user) {
         LOG.fine("Register attempt for user: " + user.getUsername());
 
-        // Validar dados do usuário
         UserValidator.ValidationResult validationResult = UserValidator.validateUser(user);
         if (!validationResult.isValid()) {
             LOG.warning("Registration attempt with invalid data: " + validationResult.getMessage());
@@ -43,7 +42,6 @@ public class RegisterResource {
                     .build();
         }
 
-        // Verificar se username já existe
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(user.getUsername());
         Entity existingUser = datastore.get(userKey);
         if (existingUser != null) {
@@ -53,7 +51,6 @@ public class RegisterResource {
                     .build();
         }
 
-        // Verificar se email já existe
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("User")
                 .setFilter(StructuredQuery.PropertyFilter.eq("email", user.getEmail()))
@@ -82,7 +79,7 @@ public class RegisterResource {
         return Response.ok(g.toJson(user == null)).build();
     }
 
-    // Método para criar o usuário root automaticamente
+    
     public static void createRootUser(Datastore datastore) {
         Key rootKey = datastore.newKeyFactory().setKind("User").newKey("root");
         Entity rootUser = datastore.get(rootKey);
@@ -90,7 +87,7 @@ public class RegisterResource {
         if (rootUser == null) {
             User root = new User();
             root.setUsername("root");
-            root.setPassword("2025adcAVALind!!!"); // Senha forte conforme especificado
+            root.setPassword("2025adcAVALind!!!"); 
             root.setEmail("root@fct.unl.pt");
             root.setFullName("Root Administrator");
             root.setPhone("+3512895629");
