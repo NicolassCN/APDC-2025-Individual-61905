@@ -56,6 +56,33 @@ public class UserValidator {
             return new ValidationResult(false, "Perfil deve ser 'public' ou 'private'");
         }
 
+        // Validar role se fornecido
+        if (user.getRole() != null && !isValidRole(user.getRole())) {
+            return new ValidationResult(false, "Role inválido. Deve ser 'ENDUSER', 'BACKOFFICE', 'ADMIN' ou 'PARTNER'");
+        }
+
+        // Validar NIF se fornecido
+        if (user.getNif() != null && !user.getNif().matches("^[0-9]{9}$")) {
+            return new ValidationResult(false, "NIF inválido. Deve conter 9 dígitos");
+        }
+
         return new ValidationResult(true, "Usuário válido");
+    }
+    
+    public static String hashPassword(String password) {
+        return org.apache.commons.codec.digest.DigestUtils.sha512Hex(password);
+    }
+    
+    public static boolean isValidRole(String role) {
+        if (role == null) return false;
+        String normalizedRole = role.toUpperCase();
+        return normalizedRole.equals("ENDUSER") || 
+               normalizedRole.equals("BACKOFFICE") || 
+               normalizedRole.equals("ADMIN") || 
+               normalizedRole.equals("PARTNER");
+    }
+    
+    public static boolean isValidAccountState(String state) {
+        return state != null && (state.equals("ATIVADA") || state.equals("DESATIVADA") || state.equals("SUSPENSA"));
     }
 } 

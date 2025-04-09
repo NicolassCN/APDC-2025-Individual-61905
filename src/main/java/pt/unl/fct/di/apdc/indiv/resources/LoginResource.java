@@ -2,71 +2,97 @@ package pt.unl.fct.di.apdc.indiv.resources;
 
 import java.util.logging.Logger;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.filters.AuthenticationFilter;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
-import pt.unl.fct.di.apdc.indiv.util.User;
+import pt.unl.fct.di.apdc.indiv.util.LoginData;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
-	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
-	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-	private final Gson g = new Gson();
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response login(LoginData data) {
-		LOG.fine("Login attempt for user: " + data.username);
+    private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
+    private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private final Gson g = new Gson();
 
-		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-		Entity user = datastore.get(userKey);
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response doLogin(LoginData data) {
+        LOG.info("Login attempt for user: " + data.username);
 
-		if (user == null) {
-			LOG.warning("Failed login attempt for username: " + data.username);
-			return Response.status(Response.Status.FORBIDDEN).entity(g.toJson("User does not exist")).build();
-		}
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+        Transaction txn = datastore.newTransaction();
 
-		User u = User.fromEntity(user);
-		if (!u.getPassword().equals(data.password)) {
-			LOG.warning("Failed login attempt for username: " + data.username);
-			return Response.status(Response.Status.FORBIDDEN).entity(g.toJson("Wrong password")).build();
-		}
+        try {
+            Entity user = txn.get(userKey);
+            if (user == null) {
+                LOG.warning("Failed login attempt for non-existent user: " + data.username);
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials.").build();
+            }
 
-		if (!u.isActive()) {
-			LOG.warning("Failed login attempt for inactive user: " + data.username);
-			return Response.status(Response.Status.FORBIDDEN).entity(g.toJson("User is not active")).build();
-		}
+            String hashedPWD = user.getString("password");
+            String inputHashedPWD = DigestUtils.sha512Hex(data.password);
+            
+            LOG.info("User found: " + data.username);
+            LOG.info("Account state: " + user.getString("accountState"));
+            
+            if (!hashedPWD.equals(inputHashedPWD)) {
+                LOG.warning("Failed login attempt (wrong password) for user: " + data.username);
+                LOG.warning("Expected hash: " + hashedPWD);
+                LOG.warning("Received hash: " + inputHashedPWD);
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials.").build();
+            }
 
-		AuthToken token = new AuthToken(data.username, u.getRole());
-		AuthenticationFilter.addToken(data.username, token);
+            // Check account state
+            String accountState = user.getString("accountState");
+            if (!accountState.equals("ATIVADA")) {
+                LOG.warning("Failed login attempt for inactive user: " + data.username);
+                return Response.status(Response.Status.FORBIDDEN).entity("User is not active.").build();
+            }
 
-		LOG.info("User logged in successfully: " + data.username);
-		return Response.ok(g.toJson(token)).build();
-	}
+            // If credentials are correct and user is active, generate token
+            AuthToken token = new AuthToken(data.username, user.getString("role"));
+            Key tokenKey = datastore.newKeyFactory()
+                    .addAncestors(PathElement.of("User", data.username))
+                    .setKind("AuthToken")
+                    .newKey(token.getTokenString());
 
-	@GET
-	@Path("/{username}")
-	public Response checkUsernameAvailable(@PathParam("username") String username) {
-		
-		return Response.ok().entity(g.toJson(true)).build();
-	}
-}
+            Entity tokenEntity = Entity.newBuilder(tokenKey)
+                    .set("username", token.getUsername())
+                    .set("role", token.getRole())
+                    .set("creationDate", token.getCreationDate())
+                    .set("expirationDate", token.getExpirationDate())
+                    .set("verifier", token.getVerifier())
+                    .build();
 
-class LoginData {
-	public String username;
-	public String password;
+            txn.put(tokenEntity);
+            txn.commit();
+
+            LOG.info("User '" + data.username + "' logged in successfully.");
+            return Response.ok(g.toJson(token)).build();
+        } catch (DatastoreException e) {
+            txn.rollback();
+            LOG.severe("Error during login for user " + data.username + ": " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Datastore error during login.").build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
 }

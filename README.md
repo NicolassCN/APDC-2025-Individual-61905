@@ -1,6 +1,119 @@
-# APDC-2025-Individual-61905
+# User Management System
 
-Projeto individual para a disciplina de ADC (2024/25).
+A complete user management system with a REST API backend and Flutter mobile application.
+
+## Project Structure
+
+The project consists of two main parts:
+
+1. Backend REST API (Java)
+2. Flutter Mobile Application
+
+### Backend REST API
+
+The backend is built with Java and provides the following features:
+
+- User registration and authentication
+- Role-based access control
+- User profile management
+- Token-based authentication
+- Google Cloud Datastore integration
+
+### Flutter Mobile Application
+
+The Flutter app provides a mobile interface for the user management system with the following features:
+
+- User registration
+- User login
+- Role-based access control
+- User profile management
+- Admin controls (for ADMIN and BACKOFFICE roles)
+
+## Getting Started
+
+### Backend Setup
+
+1. Make sure you have Java 21 installed
+2. Install Maven
+3. Configure Google Cloud credentials
+4. Run the application:
+   ```bash
+   mvn appengine:run
+   ```
+
+### Flutter App Setup
+
+1. Navigate to the Flutter app directory:
+   ```bash
+   cd flutter_app
+   ```
+
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+3. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## API Endpoints
+
+### Authentication
+
+- `POST /rest/register` - Register a new user
+- `POST /rest/login` - Login user
+- `GET /rest/logout` - Logout user
+
+### User Management
+
+- `PUT /rest/user/{username}/role` - Change user role
+- `PUT /rest/user/{username}/state` - Change user account state
+- `DELETE /rest/user/{username}` - Remove user account
+
+## Testing
+
+### Backend Tests
+
+```bash
+mvn test
+```
+
+### Flutter Tests
+
+```bash
+cd flutter_app
+flutter test
+```
+
+## Deployment
+
+### Backend Deployment
+
+```bash
+mvn appengine:deploy
+```
+
+### Flutter App Deployment
+
+```bash
+cd flutter_app
+flutter build apk  # For Android
+flutter build ios  # For iOS
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Estrutura do Projeto
 
@@ -34,13 +147,42 @@ O projeto é uma aplicação REST que utiliza:
 }
 ```
 
-### Login
+### Login (OP2)
 - **POST** `/rest/login`
 - Body (JSON):
 ```json
 {
     "username": "string",
     "password": "string"
+}
+```
+
+### Mudança de Role (OP3)
+- **POST** `/rest/changerole/`
+- Body (JSON):
+```json
+{
+    "targetUsername": "string",
+    "newRole": "string"
+}
+```
+
+### Mudança de Estado da Conta (OP3)
+- **POST** `/rest/changeAccountState`
+- Body (JSON):
+```json
+{
+    "targetUsername": "string",
+    "newState": "string"
+}
+```
+
+### Remover Conta de Usuário (OP4)
+- **POST** `/rest/removeUserAccount`
+- Body (JSON):
+```json
+{
+    "targetUsername": "string"
 }
 ```
 

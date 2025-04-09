@@ -4,43 +4,61 @@ import java.util.UUID;
 
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*60*2;
-	
-	private String username;
-	private String role;
-	private long creationData;
-	private long expirationData;
-	private String tokenID;
-	
+	public String username;
+	public String role;
+	public long creationDate; // Timestamp in milliseconds
+	public long expirationDate; // Timestamp in milliseconds
+	public String tokenString; // Unique token identifier
+	public String verifier; // Magic number for verification
+
+	// Session validity time in milliseconds (e.g., 2 hours)
+	public static final long EXPIRATION_TIME = 2 * 60 * 60 * 1000L; 
+
+	public AuthToken() {
+		// Default constructor for frameworks like GSON
+	}
+
 	public AuthToken(String username, String role) {
 		this.username = username;
 		this.role = role;
-		this.creationData = System.currentTimeMillis();
-		this.expirationData = this.creationData + EXPIRATION_TIME;
-		this.tokenID = UUID.randomUUID().toString();
+		this.creationDate = System.currentTimeMillis();
+		this.expirationDate = this.creationDate + EXPIRATION_TIME;
+		this.tokenString = UUID.randomUUID().toString(); // Simple UUID as token
+		this.verifier = generateVerifier(); // Generate a magic number for verification
 	}
 	
+	private String generateVerifier() {
+		// Generate a random 6-digit number as verifier
+		return String.format("%06d", (int)(Math.random() * 1000000));
+	}
+
+	// Getters are needed for serialization and access control checks
 	public String getUsername() {
 		return username;
 	}
-	
+
 	public String getRole() {
 		return role;
 	}
-	
-	public long getCreationData() {
-		return creationData;
+
+	public long getCreationDate() {
+		return creationDate;
+	}
+
+	public long getExpirationDate() {
+		return expirationDate;
+	}
+
+	public String getTokenString() {
+		return tokenString;
 	}
 	
-	public long getExpirationData() {
-		return expirationData;
+	public String getVerifier() {
+		return verifier;
 	}
-	
-	public String getTokenID() {
-		return tokenID;
-	}
-	
+
+	// Check if the token is still valid
 	public boolean isValid() {
-		return System.currentTimeMillis() <= expirationData;
+		return System.currentTimeMillis() < expirationDate;
 	}
 }

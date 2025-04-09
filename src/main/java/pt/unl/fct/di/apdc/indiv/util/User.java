@@ -25,8 +25,8 @@ public class User {
 
     public User() {
         // Valores padrão
-        this.role = "enduser";
-        this.accountState = "DESATIVADA";
+        this.role = "ENDUSER";
+        this.accountState = "ATIVADA";
     }
 
     public static User fromEntity(Entity entity) {
@@ -72,29 +72,47 @@ public class User {
         return builder.build();
     }
 
+    // Métodos de verificação de estado
     public boolean isActive() {
         return accountState.equals("ATIVADA");
     }
+    
+    public boolean isSuspended() {
+        return accountState.equals("SUSPENSA");
+    }
+    
+    public boolean isInactive() {
+        return accountState.equals("DESATIVADA");
+    }
+    
+    // Métodos de verificação de perfil
     public boolean isPublicProfile() {
         return profile.equals("public");
     }
+    
     public boolean isPrivateProfile() {
         return profile.equals("private");
     }
+    
+    // Métodos de verificação de role
     public boolean isAdmin() {
         return role.equals("ADMIN");
     }
+    
+    public boolean isBackoffice() {
+        return role.equals("BACKOFFICE");
+    }
+    
     public boolean isEndUser() {
-        return role.equals("enduser");
+        return role.equals("ENDUSER");
     }
-    public boolean isEmployer() {
-        return role.equals("employer");
+    
+    public boolean isPartner() {
+        return role.equals("PARTNER");
     }
-    public boolean isEmployee() {
-        return role.equals("employee");
-    }
+    
     public boolean isRoot() {
-        return role.equals("root");
+        return username.equals("root");
     }
 
     // Getters e Setters
@@ -120,7 +138,14 @@ public class User {
     public void setCitizenCardNumber(String citizenCardNumber) { this.citizenCardNumber = citizenCardNumber; }
     
     public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public void setRole(String role) { 
+        // Normalizar o role para maiúsculas
+        if (role != null) {
+            this.role = role.toUpperCase();
+        } else {
+            this.role = "ENDUSER";
+        }
+    }
     
     public String getNif() { return nif; }
     public void setNif(String nif) { this.nif = nif; }

@@ -1,0 +1,195 @@
+/* General Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --text-color: #333;
+    --light-gray: #f5f5f5;
+    --border-color: #ddd;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--light-gray);
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Form Styles */
+.form-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+}
+
+button:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+}
+
+/* Message Styles */
+.message {
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    display: none;
+}
+
+.success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.error {
+    background-color: var(--error-color);
+    color: white;
+}
+
+/* Section Styles */
+#login-section,
+#user-section,
+#admin-section {
+    display: none;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--light-gray);
+    font-weight: bold;
+}
+
+tr:hover {
+    background-color: var(--light-gray);
+}
+
+/* User List Styles */
+.user-list-section {
+    margin-bottom: 30px;
+}
+
+.user-list {
+    overflow-x: auto;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.user-table th,
+.user-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.user-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+.user-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.user-table td {
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    select {
+        font-size: 14px;
+    }
+    
+    button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .user-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .user-table th,
+    .user-table td {
+        min-width: 120px;
+    }
+} 
