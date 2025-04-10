@@ -61,9 +61,19 @@ public class UserValidator {
             return new ValidationResult(false, "Role inválido. Deve ser 'ENDUSER', 'BACKOFFICE', 'ADMIN' ou 'PARTNER'");
         }
 
+        // Validar estado da conta se fornecido
+        if (user.getAccountState() != null && !isValidAccountState(user.getAccountState())) {
+            return new ValidationResult(false, "Estado da conta inválido. Deve ser 'ATIVADA', 'DESATIVADA' ou 'SUSPENSA'");
+        }
+
         // Validar NIF se fornecido
         if (user.getNif() != null && !user.getNif().matches("^[0-9]{9}$")) {
             return new ValidationResult(false, "NIF inválido. Deve conter 9 dígitos");
+        }
+
+        // Validar NIF da entidade empregadora se fornecido
+        if (user.getEmployerNif() != null && !user.getEmployerNif().matches("^[0-9]{9}$")) {
+            return new ValidationResult(false, "NIF da entidade empregadora inválido. Deve conter 9 dígitos");
         }
 
         return new ValidationResult(true, "Usuário válido");

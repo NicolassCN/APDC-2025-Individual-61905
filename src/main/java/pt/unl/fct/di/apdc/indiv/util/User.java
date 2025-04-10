@@ -26,7 +26,7 @@ public class User {
     public User() {
         // Valores padrão
         this.role = "ENDUSER";
-        this.accountState = "ATIVADA";
+        this.accountState = "DESATIVADA";
     }
 
     public static User fromEntity(Entity entity) {

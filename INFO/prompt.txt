@@ -1,0 +1,116 @@
+Olá novamente! Dei uma lida nas operações e não sei se todas estão com todas as funcionalidades previstas até agora. Até agora fomos até a operação 6 de 10 operações, vamos repassar por todas e implementa-las completamente. Como você já tem uma visão geral, fica mais fácil termos noção do escopo. Todas as funcionalidades tem que ter um representativo visual no webapp também, pois fica mais fácil para eu testar por lá, porém atualize a collection do postman em INFO para eu testar atraves dela também. Vamos passar pela primeira operação, preste atenção aos detalhes. Por exemplo, a opção de adicionar atributos extras e a confirmação de senha não estão presentes. Vamos lá:
+
+OP1: Criação e registo de contas de utilizadores 
+Operação REST, POST 
+Deve suportar-se o registo e criação de até 4 contas de utilizadores na aplicação (devendo ser mostrada a 
+possibilidade de registo de alguns utilizadores). O registo deve permitir que na criação de contas os utilizadores 
+registem atributos (à escolha dos alunos), mas que devem incluir pelo menos os seguintes dados 
+(independentemente de outros que os alunos considerem como valorização):  
+Atributos obrigatórios para criação e registo das diferentes contas a prever 
+• Email do utilizador: terá que ter formato <string>@<string>. .... .<dom>  o <dom> representa um top-level domain DNS  o Exemplo: petermurphy3456@campus.fct.unl.pt  
+• Username (ou Nickname), exemplo: petermurphy3456: <String> 
+• Nome completo: <String> <String> <String> etc o Exemplo: Manuel Francisco da Silva Marques 
+• Telefone: número de telefone (exemplo +3512895629  
+• Password: PWD   o Deve conter uma combinação de caracteres alfabéticos (maiúsculas e minúsculas) , 
+numéricos e sinais de pontuação (combinação do tamanho ou regra que pode ser definida por 
+cada estudante) 
+§ Ex: 2025adcAVALind!!! o A inserção da PWD durante o registo deve sempre ser confirmada duas vezes  •  Perfil da conta: pode ser “público” ou “privado”
+
+Atributos adicionais (sem preenchimento obrigatório na criação e registo das diferentes contas a prever 
+(isto é que não são de preenchimento obrigatório na operação de registo de contas, mas que podem ser 
+atualizados depois pelo utilizador)
+
+•  Número de cartão do cidadão  
+•  ROLE 
+o  Pode ser ENDUSER, BACKOFFICE, ADMIN, PARTNER 
+•  NIF do utilizador 
+•  Entidade empregadora 
+o  Exemplo: Smart Forest S.A. 
+•  Função 
+o  Exemplo: Professor, Estudante, Gerente, Técnico de Floresta, etc. 
+•  Morada  
+o  Exemplo: “Rua dos alunos de APDC2324, No 100, Piso 2, Porta 116)  
+•  NIF da entidade empregadora 
+o  Exemplo: 177888999 
+•  Estado da conta 
+Deve ter um dos seguintes valores: ATIVADA, SUSPENSA ou DESATIVADA
+
+
+Atributos adicionais opcionais valorativos na criação e registo das diferentes contas a prever (isto é que não são 
+de preechimento obrigatório na operação de registo de contas, mas que podem ser atualizados depois pelo 
+utilizador) 
+•  Foto (jpeg)
+
+As contas, após serem criadas, terão sempre estes dois atributos com os seguintes valores:  
+ROLE: enduser 
+ESTADO DA CONTA: DESATIVADA 
+ 
+O ROLE inicialmente criado com o valor enduser pode depois ser modificado para um dos outros ROLES, mas 
+esta operação só pode ser feita por um utilizador com ROLE backoffice ou admin.
+
+Notas:
+
+Não vai ser preciso no exercício confirmarem a conta com confirmação do Email como é habitual em 
+muitas aplicações, para efeitos de ativação da conta. Também não será preciso verificar se no Email 
+fornecido é válido, nem testar que é possível mandar EMail ao utilizador da conta registada ou enviar 
+SMS para o telefone fornecido. Todos estes aspetos ou demais fatores de confirmação da abertura de 
+contas, a serem suportados, serão sempre considerados elementos opcionais se os estudantes os 
+quiserem considerar.
+
+Como estratégia, em tempo de deployment da aplicação, a aplicação deve logo criar automaticamete 
+uma conta de um utilizador com username “root”, e role ADMIN password pré-inicializada bem como os 
+restantes campos obrigatório como acima, devendo a respetiva conta ficar logo registada como conta 
+em estado ATIVADA na base de dados e de modo que esse utilizador possa fazer operações como as 
+que se referem a seguir.
+
+Vamos focar que isso esteja bem, mas lembre-se que as próximas operações que você ja tem conhecimento vao brincar com isso. Por isso, se for corrigir não atrapalhe o funcionamento das outras operações. Segue as proximas:
+
+OP2: Login  
+Operação REST, POST 
+Operação de “Login” de sessão O utilizador fornece o IDENTIFICADOR (ex., Username ou Email) e a password. Se as credenciais são corretas 
+(autenticação pelo servidor): recebe um token para a sessão que entre quaisquer outros atributos terá 
+• USER: o identificador  (ou username, UserID ou Email)  
+• ROLE: o role (ou código de role)  
+• VALIDITY: validade do token (correspondente à validade da sessão), com as propriedades: VALID_FROM: data da emissão (tempo do servidor) 
+o VALID_TO: data de expiração (tempo do servidor)  
+o VERIFICADOR: VERIF  VERIFICADOR: ex., um “magic (random) number” emitido pelo 
+servidor que traduz uma prova de autenticidade da emissão pelo servidor dos dados do token, 
+para realização de operações na sessão de LOGIN. A forma de criar este VERIFICADOR é 
+opcional, devendo ser definida por cada aluno.  
+Quando o utilizador conclui com sucesso o LOGIN tem acesso a uma “página de boas-
+vindas”, que indica de forma visível qual o PAPEL em que pode atuar e em que pode realizar 
+as restantes operações suportadas para o seu papel (ver abaixo )
+
+OP3: ChangeRole (Mudança de role de utilizador) 
+Operação REST, POST 
+Esta operação permite mudar o role de utilizadores de contas criadas, mas só pode ser executada de acordo 
+com as seguintes permissões:  
+•  BACKOFFICE: pode passar conta de role ENDUSER para PARTNER (ou vice-versa) 
+•  ADMIN pode passar qualquer conta de qualquer role para qualquer role  
+•  ENDUSER: não pode mudar role de nenhuma conta
+
+OP4: ChangeAccountState (Mudança de estado de conta) 
+Operação REST, POST 
+Esta operação permite mudar o estado de contas de ACTIVADA para DESATIVADA (ou vice-versa) mas só 
+pode ser executada com as seguintes permissões a partir do role do utilizador que a executa  
+•  ADMIN pode mudar o estado de qualquer conta, de qualquer estado para qualquer estado. 
+•  BACKOFFICE; pode passar o estado de contas de DESATIVADA para ATIVADA ou vide-versa.
+
+OP5: ReoveUserAccount (Remoção de contas de utilizadores) 
+Operação REST, POST 
+Esta operação serve para remover contas da aplicação, devendo obedecer aos seguintes requisitos de 
+autorização:  
+•  ADMIN; pode remover qualquer conta dado o userID ou Email da conta 
+•  BACKOFFCE: pode remover qualquer conta dado o userID ou Email da conta, desde que a conta 
+tenha Roles ENDUSER ou PARTNER
+
+OP6: ListUsers (Listar utilizadores com contas registadas) 
+Operação REST, POST 
+Esta operação serve para listar os utilizadores (contas) registadas, mostrando os seguintes atributos:  
+•  Utilizadores com role ENDUSER: podem listar os utilizadores registados e que têm perfil ENDUSER, 
+mostrando apenas os atributos: username, email e nome (mas apenas os que têm role ENDUSER) e 
+só se as respetivas contas estiverem com perfil público e as contas em estado ATIVO.  •  Utilizadores com role BACKFFICE: podem listar todos os atributos de utilizadores registados (mas 
+apenas os que têm role ENDUSER) e independentemente de estarem com perfil público ou privado ou 
+do estado da conta.  •  Utilizadores com role ADMIN: podem listar todos os atributos de utilizadores registados, 
+independentemente de estarem com perfil público ou privado, estado da conta ou role. 
+Quando haja atributos não preenchidos, a listagem deve indicar para esses atributos “NOT DEFINED” 
