@@ -1,64 +1,79 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
+import java.util.Date;
 import java.util.UUID;
 
+import org.conscrypt.ct.DigitallySigned.SignatureAlgorithm;
+
+import io.jsonwebtoken.Jwts;
+
 public class AuthToken {
+    private String username;
+    private String role;
+    private String validFrom;
+    private String validTo;
+    private String verifier;
+    private String token;
 
-	public String username;
-	public String role;
-	public long creationDate; // Timestamp in milliseconds
-	public long expirationDate; // Timestamp in milliseconds
-	public String tokenString; // Unique token identifier
-	public String verifier; // Magic number for verification
+    public AuthToken() {}
 
-	// Session validity time in milliseconds (e.g., 2 hours)
-	public static final long EXPIRATION_TIME = 2 * 60 * 60 * 1000L; 
+    public AuthToken(String username, String role) {
+        this.username = username;
+        this.role = role;
+        this.validFrom = new Date().toInstant().toString();
+        this.validTo = new Date(System.currentTimeMillis() + 2 * 60 * 60 * 1000).toInstant().toString(); // 2 hours
+        this.verifier = UUID.randomUUID().toString();
+        this.token = generateJwt();
+    }
 
-	public AuthToken() {
-		// Default constructor for frameworks like GSON
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public AuthToken(String username, String role) {
-		this.username = username;
-		this.role = role;
-		this.creationDate = System.currentTimeMillis();
-		this.expirationDate = this.creationDate + EXPIRATION_TIME;
-		this.tokenString = UUID.randomUUID().toString(); // Simple UUID as token
-		this.verifier = generateVerifier(); // Generate a magic number for verification
-	}
-	
-	private String generateVerifier() {
-		// Generate a random 6-digit number as verifier
-		return String.format("%06d", (int)(Math.random() * 1000000));
-	}
+    public String getRole() {
+        return role;
+    }
 
-	// Getters are needed for serialization and access control checks
-	public String getUsername() {
-		return username;
-	}
+    public String getValidFrom() {
+        return validFrom;
+    }
 
-	public String getRole() {
-		return role;
-	}
+    public String getValidTo() {
+        return validTo;
+    }
 
-	public long getCreationDate() {
-		return creationDate;
-	}
+    public String getVerifier() {
+        return verifier;
+    }
 
-	public long getExpirationDate() {
-		return expirationDate;
-	}
+    public String getToken() {
+        return token;
+    }
 
-	public String getTokenString() {
-		return tokenString;
-	}
-	
-	public String getVerifier() {
-		return verifier;
-	}
+    private String generateJwt() {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("role", role)
+                .claim("verifier", verifier)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 2 * 60 * 60 * 1000))
+                .signWith(SignatureAlgorithm.HS256, "your-secure-secret-key") // Replace with secure key
+                .compact();
+    }
 
-	// Check if the token is still valid
-	public boolean isValid() {
-		return System.currentTimeMillis() < expirationDate;
-	}
+    public static AuthToken validate(String token) {
+        try {
+            var claims = Jwts.parser().setSigningKey("your-secure-secret-key").parseClaimsJws(token).getBody();
+            AuthToken authToken = new AuthToken();
+            authToken.username = claims.getSubject();
+            authToken.role = claims.get("role", String.class);
+            authToken.verifier = claims.get("verifier", String.class);
+            authToken.validFrom = claims.getIssuedAt().toInstant().toString();
+            authToken.validTo = claims.getExpiration().toInstant().toString();
+            authToken.token = token;
+            return authToken;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

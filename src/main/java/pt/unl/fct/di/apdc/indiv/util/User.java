@@ -1,170 +1,178 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.StringValue;
 
 public class User {
-    // Campos obrigatórios
+    private String userId;
     private String email;
     private String username;
     private String fullName;
     private String phone;
     private String password;
-    private String profile; // "public" ou "private"
-    
-    // Campos opcionais
-    private String citizenCardNumber;
-    private String role;
-    private String nif;
+    private String profile; // public, private
+    private String citizenId;
+    private String role; // ENDUSER, BACKOFFICE, ADMIN, PARTNER
+    private String taxId;
     private String employer;
-    private String jobTitle;
+    private String position;
     private String address;
-    private String employerNif;
-    private String accountState;
-    private String photoUrl; // URL para foto em JPEG
+    private String employerTaxId;
+    private String accountState; // ACTIVATED, SUSPENDED, DEACTIVATED
+    private String photo;
 
-    public User() {
-        // Valores padrão
-        this.role = "ENDUSER";
-        this.accountState = "DESATIVADA";
+    public User() {}
+
+    public User(String userId, String email, String username, String fullName, String phone, String password,
+                String profile, String role, String accountState) {
+        this.userId = userId;
+        this.email = email;
+        this.username = username;
+        this.fullName = fullName;
+        this.phone = phone;
+        this.password = password;
+        this.profile = profile;
+        this.role = role;
+        this.accountState = accountState;
+        this.citizenId = "NOT_DEFINED";
+        this.taxId = "NOT_DEFINED";
+        this.employer = "NOT_DEFINED";
+        this.position = "NOT_DEFINED";
+        this.address = "NOT_DEFINED";
+        this.employerTaxId = "NOT_DEFINED";
+        this.photo = "NOT_DEFINED";
     }
 
-    public static User fromEntity(Entity entity) {
-        User user = new User();
-        user.email = entity.getString("email");
-        user.username = entity.getString("username");
-        user.fullName = entity.getString("fullName");
-        user.phone = entity.getString("phone");
-        user.password = entity.getString("password");
-        user.profile = entity.getString("profile");
-        user.citizenCardNumber = entity.contains("citizenCardNumber") ? entity.getString("citizenCardNumber") : null;
-        user.role = entity.getString("role");
-        user.nif = entity.contains("nif") ? entity.getString("nif") : null;
-        user.employer = entity.contains("employer") ? entity.getString("employer") : null;
-        user.jobTitle = entity.contains("jobTitle") ? entity.getString("jobTitle") : null;
-        user.address = entity.contains("address") ? entity.getString("address") : null;
-        user.employerNif = entity.contains("employerNif") ? entity.getString("employerNif") : null;
-        user.accountState = entity.getString("accountState");
-        user.photoUrl = entity.contains("photoUrl") ? entity.getString("photoUrl") : null;
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public Entity toEntity(Key key) {
-        Entity.Builder builder = Entity.newBuilder(key)
+    public String getEmail() {
+        return email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public String getCitizenId() {
+        return citizenId;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public String getEmployer() {
+        return employer;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getEmployerTaxId() {
+        return employerTaxId;
+    }
+
+    public String getAccountState() {
+        return accountState;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setCitizenId(String citizenId) {
+        this.citizenId = citizenId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public void setEmployer(String employer) {
+        this.employer = employer;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setEmployerTaxId(String employerTaxId) {
+        this.employerTaxId = employerTaxId;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
+
+    public Entity toEntity(com.google.cloud.datastore.Datastore datastore) {
+        return Entity.newBuilder(datastore.newKeyFactory().setKind("User").newKey(userId))
                 .set("email", email)
                 .set("username", username)
                 .set("fullName", fullName)
                 .set("phone", phone)
                 .set("password", password)
                 .set("profile", profile)
+                .set("citizenId", StringValue.of(citizenId))
                 .set("role", role)
-                .set("accountState", accountState);
-
-        // Adiciona campos opcionais apenas se não forem nulos
-        if (citizenCardNumber != null) builder.set("citizenCardNumber", citizenCardNumber);
-        if (nif != null) builder.set("nif", nif);
-        if (employer != null) builder.set("employer", employer);
-        if (jobTitle != null) builder.set("jobTitle", jobTitle);
-        if (address != null) builder.set("address", address);
-        if (employerNif != null) builder.set("employerNif", employerNif);
-        if (photoUrl != null) builder.set("photoUrl", photoUrl);
-
-        return builder.build();
+                .set("taxId", StringValue.of(taxId))
+                .set("employer", StringValue.of(employer))
+                .set("position", StringValue.of(position))
+                .set("address", StringValue.of(address))
+                .set("employerTaxId", StringValue.of(employerTaxId))
+                .set("accountState", accountState)
+                .set("photo", StringValue.of(photo))
+                .build();
     }
 
-    // Métodos de verificação de estado
-    public boolean isActive() {
-        return accountState.equals("ATIVADA");
+    public static User fromEntity(Entity entity) {
+        User user = new User();
+        user.userId = entity.getKey().getName();
+        user.email = entity.getString("email");
+        user.username = entity.getString("username");
+        user.fullName = entity.getString("fullName");
+        user.phone = entity.getString("phone");
+        user.password = entity.getString("password");
+        user.profile = entity.getString("profile");
+        user.citizenId = entity.getString("citizenId");
+        user.role = entity.getString("role");
+        user.taxId = entity.getString("taxId");
+        user.employer = entity.getString("employer");
+        user.position = entity.getString("position");
+        user.address = entity.getString("address");
+        user.employerTaxId = entity.getString("employerTaxId");
+        user.accountState = entity.getString("accountState");
+        user.photo = entity.getString("photo");
+        return user;
     }
-    
-    public boolean isSuspended() {
-        return accountState.equals("SUSPENSA");
-    }
-    
-    public boolean isInactive() {
-        return accountState.equals("DESATIVADA");
-    }
-    
-    // Métodos de verificação de perfil
-    public boolean isPublicProfile() {
-        return profile.equals("public");
-    }
-    
-    public boolean isPrivateProfile() {
-        return profile.equals("private");
-    }
-    
-    // Métodos de verificação de role
-    public boolean isAdmin() {
-        return role.equals("ADMIN");
-    }
-    
-    public boolean isBackoffice() {
-        return role.equals("BACKOFFICE");
-    }
-    
-    public boolean isEndUser() {
-        return role.equals("ENDUSER");
-    }
-    
-    public boolean isPartner() {
-        return role.equals("PARTNER");
-    }
-    
-    public boolean isRoot() {
-        return username.equals("root");
-    }
-
-    // Getters e Setters
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-    
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    
-    public String getProfile() { return profile; }
-    public void setProfile(String profile) { this.profile = profile; }
-    
-    public String getCitizenCardNumber() { return citizenCardNumber; }
-    public void setCitizenCardNumber(String citizenCardNumber) { this.citizenCardNumber = citizenCardNumber; }
-    
-    public String getRole() { return role; }
-    public void setRole(String role) { 
-        // Normalizar o role para maiúsculas
-        if (role != null) {
-            this.role = role.toUpperCase();
-        } else {
-            this.role = "ENDUSER";
-        }
-    }
-    
-    public String getNif() { return nif; }
-    public void setNif(String nif) { this.nif = nif; }
-    
-    public String getEmployer() { return employer; }
-    public void setEmployer(String employer) { this.employer = employer; }
-    
-    public String getJobTitle() { return jobTitle; }
-    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
-    
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    
-    public String getEmployerNif() { return employerNif; }
-    public void setEmployerNif(String employerNif) { this.employerNif = employerNif; }
-    
-    public String getAccountState() { return accountState; }
-    public void setAccountState(String accountState) { this.accountState = accountState; }
-    
-    public String getPhotoUrl() { return photoUrl; }
-    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
-} 
+}

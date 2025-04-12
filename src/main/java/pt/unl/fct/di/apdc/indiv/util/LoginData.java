@@ -1,17 +1,16 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
 public class LoginData {
-	
-	public String username;
-	public String password;
-	
-	public LoginData() {
-		
-	}
-	
-	public LoginData(String username, String password) {
-		this.username = username;
-		this.password = password;
-	}
-	
+    private String identifier;
+    private String password;
+
+    public LoginData() {}
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

@@ -7,103 +7,114 @@ import java.util.logging.Logger;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import pt.unl.fct.di.apdc.indiv.util.AuthToken;
 import pt.unl.fct.di.apdc.indiv.util.User;
 
-@Path("/listusers")
+@Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ListUsersResource {
     private static final Logger LOG = Logger.getLogger(ListUsersResource.class.getName());
+    private final Gson gson = new Gson();
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-    private final Gson g = new Gson();
 
     @POST
+    @Path("/all")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response listUsers(User requestingUser) {
-        LOG.info("List users request from: " + requestingUser.getUsername());
-        
+    public Response listUsers(@Context ContainerRequestContext context) {
+        LOG.fine("List users attempt");
+
         try {
-            // Verificar se o usuário existe e está autenticado
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(requestingUser.getUsername());
-            Entity userEntity = datastore.get(userKey);
-            
-            if (userEntity == null) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity(g.toJson("Usuário não encontrado"))
-                        .build();
-            }
-            
-            String userRole = userEntity.getString("role");
-            List<User> users = new ArrayList<>();
-            
-            // Construir query base
-            Query<Entity> query;
-            
-            // Aplicar filtros baseados no role do usuário
-            if ("ENDUSER".equals(userRole)) {
-                // ENDUSER só pode ver outros ENDUSER com perfil público e conta ativa
-                query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .setFilter(StructuredQuery.CompositeFilter.and(
-                        StructuredQuery.PropertyFilter.eq("role", "ENDUSER"),
-                        StructuredQuery.PropertyFilter.eq("profile", "public"),
-                        StructuredQuery.PropertyFilter.eq("accountState", "ATIVADA")
-                    ))
-                    .build();
-            } else if ("BACKOFFICE".equals(userRole)) {
-                // BACKOFFICE pode ver todos os ENDUSER
-                query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .setFilter(StructuredQuery.PropertyFilter.eq("role", "ENDUSER"))
-                    .build();
-            } else {
-                // ADMIN pode ver todos os usuários (sem filtro)
-                query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .build();
-            }
-            
+            AuthToken token = (AuthToken) context.getProperty("authToken");
+            Query<Entity> query = Query.newEntityQueryBuilder().setKind("User").build();
             QueryResults<Entity> results = datastore.run(query);
-            
+            List<UserResponse> users = new ArrayList<>();
+
             while (results.hasNext()) {
                 Entity entity = results.next();
                 User user = User.fromEntity(entity);
-                
-                // Filtrar campos baseado no role do usuário
-                if ("ENDUSER".equals(userRole)) {
-                    // ENDUSER só vê username, email e nome
-                    User filteredUser = new User();
-                    filteredUser.setUsername(user.getUsername());
-                    filteredUser.setEmail(user.getEmail());
-                    filteredUser.setFullName(user.getFullName());
-                    users.add(filteredUser);
-                } else if ("BACKOFFICE".equals(userRole)) {
-                    // BACKOFFICE vê todos os campos dos ENDUSER
-                    users.add(user);
-                } else if ("ADMIN".equals(userRole)) {
-                    // ADMIN vê todos os campos de todos os usuários
-                    users.add(user);
+
+                if (token.getRole().equals("ENDUSER")) {
+                    if (user.getRole().equals("ENDUSER") && user.getProfile().equals("public") && user.getAccountState().equals("ACTIVATED")) {
+                        users.add(new UserResponse(user, true));
+                    }
+                } else if (token.getRole().equals("BACKOFFICE")) {
+                    if (user.getRole().equals("ENDUSER")) {
+                        users.add(new UserResponse(user, false));
+                    }
+                } else if (token.getRole().equals("ADMIN")) {
+                    users.add(new UserResponse(user, false));
                 }
             }
-            
-            return Response.ok(g.toJson(users)).build();
+
+            return Response.ok(gson.toJson(users)).build();
         } catch (Exception e) {
-            LOG.severe("Error listing users: " + e.getMessage());
-            e.printStackTrace();
+            LOG.warning("List users failed: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(g.toJson("Erro ao listar usuários: " + e.getMessage()))
-                    .build();
+                    .entity(gson.toJson(new ErrorResponse("Internal server error"))).build();
         }
     }
-} 
+
+    private static class ErrorResponse {
+        public String error;
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
+    }
+
+    private static class UserResponse {
+        public String username;
+        public String email;
+        public String fullName;
+        public String phone;
+        public String accountState;
+        public String profile;
+        public String role;
+        public String address;
+        public String taxId;
+        public String employer;
+        public String position;
+        public String employerTaxId;
+        public String photo;
+
+        public UserResponse(User user, boolean limited) {
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.fullName = user.getFullName();
+            if (limited) {
+                this.phone = null;
+                this.accountState = null;
+                this.profile = null;
+                this.role = null;
+                this.address = null;
+                this.taxId = null;
+                this.employer = null;
+                this.position = null;
+                this.employerTaxId = null;
+                this.photo = null;
+            } else {
+                this.phone = user.getPhone();
+                this.accountState = user.getAccountState();
+                this.profile = user.getProfile();
+                this.role = user.getRole();
+                this.address = user.getAddress();
+                this.taxId = user.getTaxId();
+                this.employer = user.getEmployer();
+                this.position = user.getPosition();
+                this.employerTaxId = user.getEmployerTaxId();
+                this.photo = user.getPhoto();
+            }
+        }
+    }
+}

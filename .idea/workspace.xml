@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a1059458-401b-47b9-8ffa-633f26b1c42e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/filters/AuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/filters/AuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ChangeAccountStateResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ChangeAccountStateResource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ChangeRoleResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ChangeRoleResource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ComputationResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ListUsersResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/ListUsersResource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/LoginResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/LoginResource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/RegisterResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/RegisterResource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/resources/RemoveUserAccountResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/ApiResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/AppInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/AppInitializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/AuthToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/AuthToken.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/ChangeAccountStateData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/ChangeRoleData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/ChangeRoleData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/LoginData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/LoginData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/RegisterData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/RemoveUserAccountData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/Response.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/UserValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pt/unl/fct/di/apdc/indiv/util/UserValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/js/app.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;NicolassCN&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/NicolassCN/APDC-2025-Individual-61905.git&quot;,
+    &quot;accountId&quot;: &quot;145f8bb7-dad0-40d5-8a64-662a5a1d078b&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2vctbxCwRpQeU1CfchXY9a80GK6" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ACTIVE_CLOUD_PROJECT_ACCOUNT": "businessnicolascn@gmail.com",
+    "ACTIVE_CLOUD_PROJECT_ID": "indiv-project-456220",
+    "ACTIVE_CLOUD_PROJECT_NAME": "indiv-project",
+    "ACTIVE_CLOUD_PROJECT_NUMBER": "733107659545",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.google.cloudcode.ide_session_index": "20250412_0002",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/nicolascn/FCT/adc/projects/indiv",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="Google App Engine Deployment" type="gcp-app-engine-deploy" factoryName="Google App Engine Deployment">
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a1059458-401b-47b9-8ffa-633f26b1c42e" name="Changes" comment="" />
+      <created>1744456264497</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1744456264497</updated>
+      <workItem from="1744456266068" duration="295000" />
+      <workItem from="1744473479380" duration="58000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

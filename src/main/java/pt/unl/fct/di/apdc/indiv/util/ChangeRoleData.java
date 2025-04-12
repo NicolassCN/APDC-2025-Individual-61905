@@ -1,15 +1,16 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
 public class ChangeRoleData {
-    public String targetUsername;
-    public String newRole;
+    private String username;
+    private String newRole;
 
-    public ChangeRoleData() {
-        // Default constructor for GSON
+    public ChangeRoleData() {}
+
+    public String getUsername() {
+        return username;
     }
 
-    public ChangeRoleData(String targetUsername, String newRole) {
-        this.targetUsername = targetUsername;
-        this.newRole = newRole;
+    public String getNewRole() {
+        return newRole;
     }
-} 
+}
