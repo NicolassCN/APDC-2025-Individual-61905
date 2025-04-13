@@ -1,46 +1,69 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*60*2;
-	
-	private String username;
+	private String user;
 	private String role;
-	private long creationData;
-	private long expirationData;
-	private String tokenID;
+	private TokenValidity validity;
 	
-	public AuthToken(String username, String role) {
-		this.username = username;
-		this.role = role;
-		this.creationData = System.currentTimeMillis();
-		this.expirationData = this.creationData + EXPIRATION_TIME;
-		this.tokenID = UUID.randomUUID().toString();
+	public static class TokenValidity {
+		private String valid_from;
+		private String valid_to;
+		private String verificador;
+		
+		public TokenValidity() {
+			Instant now = Instant.now();
+			this.valid_from = now.toString();
+			this.valid_to = now.plus(2, ChronoUnit.HOURS).toString();
+			this.verificador = UUID.randomUUID().toString();
+		}
+		
+		public String getValid_from() {
+			return valid_from;
+		}
+		
+		public String getValid_to() {
+			return valid_to;
+		}
+		
+		public String getVerificador() {
+			return verificador;
+		}
+		
+		public boolean isValid() {
+			Instant now = Instant.now();
+			Instant validTo = Instant.parse(valid_to);
+			return now.isBefore(validTo);
+		}
 	}
 	
-	public String getUsername() {
-		return username;
+	public AuthToken(String user, String role) {
+		this.user = user;
+		this.role = role;
+		this.validity = new TokenValidity();
+	}
+	
+	public String getUser() {
+		return user;
 	}
 	
 	public String getRole() {
 		return role;
 	}
 	
-	public long getCreationData() {
-		return creationData;
-	}
-	
-	public long getExpirationData() {
-		return expirationData;
-	}
-	
-	public String getTokenID() {
-		return tokenID;
+	public TokenValidity getValidity() {
+		return validity;
 	}
 	
 	public boolean isValid() {
-		return System.currentTimeMillis() <= expirationData;
+		return validity.isValid();
+	}
+	
+	public String getTokenID() {
+		return validity.getVerificador();
 	}
 }

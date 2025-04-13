@@ -34,7 +34,7 @@ public class ComputationResource {
 
 	private static final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
 
-	public ComputationResource() {} //nothing to be done here @GET
+	public ComputationResource() {} 
 
 	@GET
 	@Path("/hello")

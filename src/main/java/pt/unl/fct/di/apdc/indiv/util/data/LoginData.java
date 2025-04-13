@@ -1,4 +1,4 @@
-package pt.unl.fct.di.apdc.indiv.util;
+package pt.unl.fct.di.apdc.indiv.util.data;
 
 public class LoginData {
 	

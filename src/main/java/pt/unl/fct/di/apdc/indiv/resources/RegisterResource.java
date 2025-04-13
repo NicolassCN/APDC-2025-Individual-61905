@@ -47,7 +47,7 @@ public class RegisterResource {
         if (existingUser != null) {
             LOG.warning("Registration attempt with existing username: " + user.getUsername());
             return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Username já existe"))
+                    .entity(g.toJson("Username already exists"))
                     .build();
         }
 
@@ -59,16 +59,16 @@ public class RegisterResource {
         if (results.hasNext()) {
             LOG.warning("Registration attempt with existing email: " + user.getEmail());
             return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Email já está em uso"))
+                    .entity(g.toJson("Email already in use"))
                     .build();
         }
 
-        // Salvar usuário no datastore
+        // Save user to datastore
         Entity userEntity = user.toEntity(userKey);
         datastore.put(userEntity);
 
         LOG.info("User registered successfully: " + user.getUsername());
-        return Response.ok(g.toJson("Usuário registrado com sucesso")).build();
+        return Response.ok(g.toJson("User registered successfully")).build();
     }
 
     @GET
@@ -93,7 +93,7 @@ public class RegisterResource {
             root.setPhone("+3512895629");
             root.setProfile("private");
             root.setRole("ADMIN");
-            root.setAccountState("ATIVADA");
+            root.setAccountState("ACTIVE");
             
             Entity rootEntity = root.toEntity(rootKey);
             datastore.put(rootEntity);

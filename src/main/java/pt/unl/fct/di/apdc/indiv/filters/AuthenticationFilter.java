@@ -26,12 +26,41 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         tokens.remove(username);
     }
 
+    public static String getUsernameFromToken(String tokenId) {
+        for (Map.Entry<String, AuthToken> entry : tokens.entrySet()) {
+            if (entry.getValue().getTokenID().equals(tokenId) && entry.getValue().isValid()) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public static AuthToken getTokenFromUsername(String username) {
+        AuthToken token = tokens.get(username);
+        if (token != null && token.isValid()) {
+            return token;
+        }
+        return null;
+    }
+
+    public static AuthToken getTokenFromHeader(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        String tokenId = authHeader.substring("Bearer ".length());
+        String username = getUsernameFromToken(tokenId);
+        if (username == null) {
+            return null;
+        }
+        return getTokenFromUsername(username);
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getPath();
         
         // Skip authentication for login and register endpoints
-        if (path.equals("login") || path.equals("register")) {
+        if (path.equals("api/user/register") || path.equals("api/user/login")) {
             return;
         }
 
@@ -46,16 +75,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         String token = authHeader.substring("Bearer ".length());
-        boolean validToken = false;
+        String username = getUsernameFromToken(token);
 
-        for (AuthToken authToken : tokens.values()) {
-            if (authToken.getTokenID().equals(token) && authToken.isValid()) {
-                validToken = true;
-                break;
-            }
-        }
-
-        if (!validToken) {
+        if (username == null) {
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                     .entity("{\"error\": \"Invalid or expired token\"}")
                     .type(MediaType.APPLICATION_JSON)

@@ -29,7 +29,7 @@
   </static-files>
 
   <application>indiv-project-456220</application>
-  <version>1</version>
+  <version>2</version>
   <threadsafe>true</threadsafe>
 
 </appengine-web-app>
