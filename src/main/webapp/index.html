@@ -241,7 +241,7 @@
 
   <body>
     <div class="container">
-      <h1>ADC: User Management System</h1>
+      <h1>User Management System</h1>
       
       <div id="message" class="message"></div>
       
@@ -250,8 +250,8 @@
         <h2>Login</h2>
         <form id="login-form">
           <div class="form-group">
-            <label for="login-username">Username:</label>
-            <input type="text" id="login-username" name="username" required>
+            <label for="login-identifier">Username or Email:</label>
+            <input type="text" id="login-identifier" name="identifier" required>
           </div>
           <div class="form-group">
             <label for="login-password">Password:</label>
@@ -266,11 +266,11 @@
       <section id="register-section" class="section" style="display: none;">
         <h2>Register</h2>
         <form id="register-form">
-          <!-- Campos obrigatórios -->
+          <!-- Required Fields -->
           <div class="form-group">
             <label for="register-email">Email: <span class="required">*</span></label>
             <input type="email" id="register-email" name="email" required>
-            <small>Formato: usuario@dominio.tld</small>
+            <small>Format: user@domain.tld</small>
           </div>
           <div class="form-group">
             <label for="register-username">Username: <span class="required">*</span></label>
@@ -283,12 +283,12 @@
           <div class="form-group">
             <label for="register-phone">Phone: <span class="required">*</span></label>
             <input type="tel" id="register-phone" name="phone" required>
-            <small>Formato: +3512895629</small>
+            <small>Format: +3512895629</small>
           </div>
           <div class="form-group">
             <label for="register-password">Password: <span class="required">*</span></label>
             <input type="password" id="register-password" name="password" required>
-            <small>Mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e caracteres especiais</small>
+            <small>Minimum 8 characters, including uppercase, lowercase, numbers, and special characters</small>
           </div>
           <div class="form-group">
             <label for="register-confirm-password">Confirm Password: <span class="required">*</span></label>
@@ -303,17 +303,17 @@
             </select>
           </div>
           
-          <!-- Campos opcionais -->
+          <!-- Optional Fields -->
           <div class="optional-fields hidden" id="optionalFields">
-            <h3>Campos Opcionais</h3>
+            <h3>Optional Fields</h3>
             <div class="form-group">
               <label for="register-citizen-card">Citizen Card Number:</label>
               <input type="text" id="register-citizen-card" name="citizenCardNumber">
             </div>
             <div class="form-group">
-              <label for="register-nif">NIF:</label>
+              <label for="register-nif">Tax ID:</label>
               <input type="text" id="register-nif" name="nif">
-              <small>9 dígitos</small>
+              <small>9 digits</small>
             </div>
             <div class="form-group">
               <label for="register-employer">Employer:</label>
@@ -328,19 +328,18 @@
               <input type="text" id="register-address" name="address">
             </div>
             <div class="form-group">
-              <label for="register-employer-nif">Employer NIF:</label>
+              <label for="register-employer-nif">Employer Tax ID:</label>
               <input type="text" id="register-employer-nif" name="employerNif">
-              <small>9 dígitos</small>
+              <small>9 digits</small>
             </div>
             <div class="form-group">
               <label for="register-photo">Photo URL:</label>
-              <input type="text" id="register-photo" name="photoUrl">
-              <small>Apenas arquivos JPG</small>
+              <input type="url" id="register-photo" name="photo">
+              <small>URL to JPEG photo</small>
             </div>
           </div>
           
-          <a href="#" id="optionalFieldsToggle" class="toggle-optional">Mostrar campos opcionais</a>
-          
+          <div class="toggle-optional" id="toggleOptional">Show Optional Fields</div>
           <button type="submit">Register</button>
           <p>Already have an account? <a href="#" id="show-login">Login here</a></p>
         </form>
@@ -371,10 +370,10 @@
                 <label for="change-role-new-role">New Role:</label>
                 <select id="change-role-new-role" name="newRole" required>
                   <option value="">Select a role</option>
-                  <option value="ENDUSER">ENDUSER</option>
-                  <option value="PARTNER">PARTNER</option>
-                  <option value="BACKOFFICE">BACKOFFICE</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option value="ENDUSER">End User</option>
+                  <option value="PARTNER">Partner</option>
+                  <option value="BACKOFFICE">Back Office</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
               <button type="submit">Change Role</button>
@@ -393,8 +392,9 @@
                 <label for="change-state-new-state">New State:</label>
                 <select id="change-state-new-state" name="newState" required>
                   <option value="">Select a state</option>
-                  <option value="ACTIVATED">ACTIVATED</option>
-                  <option value="DEACTIVATED">DEACTIVATED</option>
+                  <option value="ACTIVATED">Activated</option>
+                  <option value="DEACTIVATED">Deactivated</option>
+                  <option value="SUSPENDED">Suspended</option>
                 </select>
               </div>
               <button type="submit">Change State</button>

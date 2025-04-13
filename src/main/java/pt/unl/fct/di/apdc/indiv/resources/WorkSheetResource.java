@@ -6,112 +6,118 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.exceptions.AppException;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
-import pt.unl.fct.di.apdc.indiv.util.WorkSheet;
 import pt.unl.fct.di.apdc.indiv.util.data.WorkSheetData;
 
-@Path("/worksheet")
+@Path("/work-sheet")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class WorkSheetResource {
     private static final Logger LOG = Logger.getLogger(WorkSheetResource.class.getName());
-    private final Gson gson = new Gson();
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Gson gson = new Gson();
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createWorkSheet(@Context ContainerRequestContext context, WorkSheetData data) {
-        LOG.fine("Create/update worksheet attempt for reference: " + data.getReference());
+    public Response createWorkSheet(@HeaderParam("Authorization") String authHeader, WorkSheetData data) {
+        LOG.info("Attempt to create/modify work sheet: " + data.referenciaObra);
 
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            LOG.warning("Missing or invalid authorization header");
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing or invalid authorization header").build();
+        }
+
+        String token = authHeader.substring(7);
+
+        Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(token);
+        Entity tokenEntity = datastore.get(tokenKey);
+
+        if (tokenEntity == null) {
+            LOG.warning("Invalid token");
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("Invalid token").build();
+        }
+
+        AuthToken authToken = AuthToken.fromEntity(tokenEntity);
+        String role = authToken.getRole();
+
+        if (!role.equals("BACKOFFICE") && !role.equals("PARTNER")) {
+            LOG.warning("Unauthorized access attempt by user with role: " + role);
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Only BACKOFFICE and PARTNER users can manage work sheets").build();
+        }
+
+        Transaction txn = datastore.newTransaction();
         try {
-            AuthToken token = (AuthToken) context.getProperty("authToken");
-            if (!token.getRole().equals("BACKOFFICE") && !token.getRole().equals("PARTNER")) {
-                throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
-            }
+            Key worksheetKey = datastore.newKeyFactory().setKind("WorkSheet").newKey(data.referenciaObra);
+            Entity existingWorksheet = txn.get(worksheetKey);
 
-            Key wsKey = datastore.newKeyFactory().setKind("WorkSheet").newKey(data.getReference());
-            Entity existingWs = datastore.get(wsKey);
-            WorkSheet ws;
-
-            if (existingWs == null) {
-                if (!token.getRole().equals("BACKOFFICE")) {
-                    throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
+            if (existingWorksheet != null) {
+                // Verificar se a transição de estado é válida
+                String currentState = existingWorksheet.getString("estadoObra");
+                if (!isValidStateTransition(currentState, data.estadoObra)) {
+                    LOG.warning("Invalid state transition from " + currentState + " to " + data.estadoObra);
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Invalid state transition").build();
                 }
-                validateRequiredFields(data);
-                ws = new WorkSheet(data.getReference(), data.getDescription(), data.getTargetType(), data.getAwardStatus());
-            } else {
-                ws = WorkSheet.fromEntity(existingWs);
             }
 
-            if (token.getRole().equals("BACKOFFICE")) {
-                updateWorkSheetFields(ws, data);
-            } else if (token.getRole().equals("PARTNER") && ws.getAssignedEntity().equals(token.getUsername())) {
-                if (data.getWorkStatus() != null && (data.getWorkStatus().equals("IN_PROGRESS") || data.getWorkStatus().equals("COMPLETED"))) {
-                    ws.setWorkStatus(data.getWorkStatus());
-                    ws.setNotes(data.getNotes() != null ? data.getNotes() : ws.getNotes());
-                } else {
-                    throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
-                }
-            } else {
-                throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
-            }
+            Entity worksheet = Entity.newBuilder(worksheetKey)
+                    .set("referenciaObra", data.referenciaObra)
+                    .set("descricao", data.descricao)
+                    .set("tipoAlvo", data.tipoAlvo)
+                    .set("estadoAdjudicacao", data.estadoAdjudicacao)
+                    .set("dataAdjudicacao", data.dataAdjudicacao != null ? data.dataAdjudicacao : "")
+                    .set("dataInicioPrevista", data.dataInicioPrevista != null ? data.dataInicioPrevista : "")
+                    .set("dataConclusaoPrevista", data.dataConclusaoPrevista != null ? data.dataConclusaoPrevista : "")
+                    .set("contaEntidade", data.contaEntidade != null ? data.contaEntidade : "")
+                    .set("entidadeAdjudicacao", data.entidadeAdjudicacao != null ? data.entidadeAdjudicacao : "")
+                    .set("nifEmpresa", data.nifEmpresa != null ? data.nifEmpresa : "")
+                    .set("estadoObra", data.estadoObra != null ? data.estadoObra : "PENDENTE")
+                    .set("observacoes", data.observacoes != null ? data.observacoes : "")
+                    .build();
 
-            datastore.put(ws.toEntity(datastore));
-            return Response.ok(gson.toJson(new WorkSheetResponse("Worksheet created/updated successfully"))).build();
-        } catch (AppException e) {
-            LOG.warning("Worksheet operation failed: " + e.getMessage());
-            return Response.status(e.getStatus()).entity(gson.toJson(new ErrorResponse(e.getMessage()))).build();
+            txn.put(worksheet);
+            txn.commit();
+
+            LOG.info("Work sheet created/modified successfully: " + data.referenciaObra);
+            return Response.status(Response.Status.OK)
+                    .entity("Work sheet created/modified successfully").build();
+
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Failed to create/modify work sheet: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to create/modify work sheet").build();
         }
     }
 
-    private void validateRequiredFields(WorkSheetData data) throws AppException {
-        if (data.getReference() == null || data.getDescription() == null || data.getTargetType() == null || data.getAwardStatus() == null) {
-            throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "Missing required fields");
+    private boolean isValidStateTransition(String currentState, String newState) {
+        if (currentState == null || newState == null) {
+            return true; // Permitir definição inicial do estado
         }
-        if (!data.getTargetType().equals("PUBLIC_PROPERTY") && !data.getTargetType().equals("PRIVATE_PROPERTY")) {
-            throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "Invalid target type");
-        }
-        if (!data.getAwardStatus().equals("AWARDED") && !data.getAwardStatus().equals("NOT_AWARDED")) {
-            throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "Invalid award status");
-        }
-    }
 
-    private void updateWorkSheetFields(WorkSheet ws, WorkSheetData data) {
-        ws.setDescription(data.getDescription() != null ? data.getDescription() : ws.getDescription());
-        ws.setTargetType(data.getTargetType() != null ? data.getTargetType() : ws.getTargetType());
-        ws.setAwardStatus(data.getAwardStatus() != null ? data.getAwardStatus() : ws.getAwardStatus());
-        ws.setAwardDate(data.getAwardDate() != null ? data.getAwardDate() : ws.getAwardDate());
-        ws.setStartDate(data.getStartDate() != null ? data.getStartDate() : ws.getStartDate());
-        ws.setEndDate(data.getEndDate() != null ? data.getEndDate() : ws.getEndDate());
-        ws.setAssignedEntity(data.getAssignedEntity() != null ? data.getAssignedEntity() : ws.getAssignedEntity());
-        ws.setAwardedEntity(data.getAwardedEntity() != null ? data.getAwardedEntity() : ws.getAwardedEntity());
-        ws.setCompanyTaxId(data.getCompanyTaxId() != null ? data.getCompanyTaxId() : ws.getCompanyTaxId());
-        ws.setWorkStatus(data.getWorkStatus() != null ? data.getWorkStatus() : ws.getWorkStatus());
-        ws.setNotes(data.getNotes() != null ? data.getNotes() : ws.getNotes());
-    }
-
-    private static class ErrorResponse {
-        public String error;
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
-    }
-
-    private static class WorkSheetResponse {
-        public String message;
-        public WorkSheetResponse(String message) {
-            this.message = message;
+        switch (currentState) {
+            case "PENDENTE":
+                return newState.equals("EM_EXECUCAO") || newState.equals("CANCELADA");
+            case "EM_EXECUCAO":
+                return newState.equals("CONCLUIDA") || newState.equals("CANCELADA");
+            case "CONCLUIDA":
+            case "CANCELADA":
+                return false; // Estados finais
+            default:
+                return false;
         }
     }
 }

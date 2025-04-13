@@ -1,185 +1,276 @@
 {
 	"info": {
-		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-		"name": "APDC-2025-Individual-61905",
-		"description": "Coleção de testes para o projeto individual de ADC",
+		"_postman_id": "1234567890",
+		"name": "APDC Individual Project",
+		"description": "Collection for testing all operations of the APDC Individual Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register - Usuário Comum",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"joaosilva\",\n    \"password\": \"2025adcAVALind!!!\",\n    \"email\": \"joao.silva@campus.fct.unl.pt\",\n    \"fullName\": \"João Manuel da Silva\",\n    \"phone\": \"+3512895629\",\n    \"profile\": \"public\",\n    \"citizenCardNumber\": \"12345678\",\n    \"nif\": \"123456789\",\n    \"employer\": \"FCT-UNL\",\n    \"jobTitle\": \"Estudante\",\n    \"address\": \"Rua dos alunos de APDC2324, No 100, Piso 2, Porta 116\",\n    \"employerNif\": \"177888999\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/rest/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["rest", "register"]
-						}
+			"name": "OP1 - User Registration",
+			"description": "Criação e Registo de Contas de Utilizadores",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
 					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"user@example.com\",\n    \"username\": \"testuser\",\n    \"fullName\": \"Test User\",\n    \"phone\": \"+351912345678\",\n    \"password\": \"Test2024!\",\n    \"confirmPassword\": \"Test2024!\",\n    \"profile\": \"public\",\n    \"citizenCardNumber\": \"12345678\",\n    \"taxId\": \"123456789\",\n    \"employer\": \"Test Company\",\n    \"jobTitle\": \"Developer\",\n    \"address\": \"Test Street, 123\",\n    \"employerTaxId\": \"987654321\",\n    \"photo\": \"https://example.com/photo.jpg\"\n}"
 				},
-				{
-					"name": "Register - Backoffice",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"mariaadmin\",\n    \"password\": \"2025adcAVALind!!!\",\n    \"email\": \"maria.admin@fct.unl.pt\",\n    \"fullName\": \"Maria João Administradora\",\n    \"phone\": \"+3512895629\",\n    \"profile\": \"private\",\n    \"role\": \"BACKOFFICE\",\n    \"nif\": \"987654321\",\n    \"employer\": \"FCT-UNL\",\n    \"jobTitle\": \"Administradora\",\n    \"address\": \"Rua dos alunos de APDC2324, No 100, Piso 2, Porta 116\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/rest/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["rest", "register"]
-						}
-					}
-				},
-				{
-					"name": "Register - Partner",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"smartforest\",\n    \"password\": \"2025adcAVALind!!!\",\n    \"email\": \"contact@smartforest.pt\",\n    \"fullName\": \"Smart Forest S.A.\",\n    \"phone\": \"+3512895629\",\n    \"profile\": \"public\",\n    \"role\": \"PARTNER\",\n    \"nif\": \"123456789\",\n    \"employer\": \"Smart Forest S.A.\",\n    \"jobTitle\": \"Gerente\",\n    \"address\": \"Rua da Floresta, No 1\",\n    \"employerNif\": \"177888999\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/rest/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["rest", "register"]
-						}
-					}
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.tokenID) {",
-									"    pm.environment.set(\"token\", jsonData.tokenID);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"root\",\n    \"password\": \"2025adcAVALind!!!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/rest/login",
-							"host": ["{{baseUrl}}"],
-							"path": ["rest", "login"]
-						}
-					}
-				},
-				{
-					"name": "Change Role (Admin Example)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"targetUsername\": \"enduser1\", \n    \"newRole\": \"BACKOFFICE\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/rest/changerole/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"rest",
-								"changerole",
-								""
-							]
-						}
-					},
-					"response": []
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/register",
+					"path": ["rest", "user", "register"]
 				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [""]
 			}
 		},
 		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [""]
+			"name": "OP2 - Login",
+			"description": "Login de utilizador",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if (jsonData.token && jsonData.token.validity && jsonData.token.validity.verifier) {",
+							"    pm.environment.set(\"authToken\", jsonData.token.validity.verifier);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"root\",\n    \"password\": \"RootAdmin123!\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/login",
+					"path": ["rest", "user", "login"]
+				}
+			}
+		},
+		{
+			"name": "OP3 - Change Role",
+			"description": "Mudança de Role de Utilizador",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"testuser\",\n    \"newRole\": \"PARTNER\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/changeRole",
+					"path": ["rest", "user", "changeRole"]
+				}
+			}
+		},
+		{
+			"name": "OP4 - Change Account State",
+			"description": "Mudança de Estado de Conta",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"testuser\",\n    \"newState\": \"ACTIVATED\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/changeAccountState",
+					"path": ["rest", "user", "changeAccountState"]
+				}
+			}
+		},
+		{
+			"name": "OP5 - Remove User Account",
+			"description": "Remoção de Contas de Utilizadores",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"testuser\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/removeUserAccount",
+					"path": ["rest", "user", "removeUserAccount"]
+				}
+			}
+		},
+		{
+			"name": "OP6 - List Users",
+			"description": "Listar Utilizadores com Contas Registadas",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/all",
+					"path": ["rest", "user", "all"]
+				}
+			}
+		},
+		{
+			"name": "OP7 - Change Account Attributes",
+			"description": "Modificação de Atributos de Contas de Utilizadores",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"testuser\",\n    \"attributes\": {\n        \"phone\": \"+351987654321\",\n        \"address\": \"New Address, 456\",\n        \"jobTitle\": \"Senior Developer\",\n        \"photo\": \"https://example.com/new-photo.jpg\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/update-attributes",
+					"path": ["rest", "user", "update-attributes"]
+				}
+			}
+		},
+		{
+			"name": "OP8 - Change Password",
+			"description": "Modificação de Password do Utilizador",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"currentPassword\": \"Test2024!\",\n    \"newPassword\": \"NewTest2024!\",\n    \"confirmPassword\": \"NewTest2024!\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/change-password",
+					"path": ["rest", "user", "change-password"]
+				}
+			}
+		},
+		{
+			"name": "OP9 - Logout",
+			"description": "LOGOUT de uma Sessão",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/user/logout",
+					"path": ["rest", "user", "logout"]
+				}
+			}
+		},
+		{
+			"name": "OP10 - Create/Update Work Sheet",
+			"description": "Registar ou Modificar Folhas de Obra",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{authToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"referenciaObra\": \"O234/CM/2024\",\n    \"descricao\": \"Obra para reflorestação da propriedade P34567\",\n    \"tipoAlvo\": \"Propriedade Pública\",\n    \"estadoAdjudicacao\": \"ADJUDICADO\",\n    \"dataAdjudicacao\": \"2024-05-01\",\n    \"dataInicioPrevista\": \"2024-06-01\",\n    \"dataConclusaoPrevista\": \"2024-12-01\",\n    \"contaEntidade\": \"PARTNER_12345\",\n    \"entidadeAdjudicacao\": \"Reflorestação Inteligente S.A.\",\n    \"nifEmpresa\": \"511876234\",\n    \"estadoObra\": \"EM_EXECUCAO\",\n    \"observacoes\": \"A obra está a decorrer conforme o previsto.\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/rest/work-sheet/create",
+					"path": ["rest", "work-sheet", "create"]
+				}
 			}
 		}
 	],
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080",
-			"type": "string"
+			"value": "http://localhost:8080"
 		},
 		{
-			"key": "token",
-			"value": "",
-			"type": "string"
+			"key": "authToken",
+			"value": "your_auth_token_here"
 		}
 	]
 } 

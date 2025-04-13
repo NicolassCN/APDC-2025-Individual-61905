@@ -2,14 +2,14 @@ package pt.unl.fct.di.apdc.indiv.resources;
 
 import java.util.logging.Logger;
 
-import com.google.appengine.repackaged.com.google.gson.Gson;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.StructuredQuery;
+import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -17,82 +17,127 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.exceptions.AppException;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
-import pt.unl.fct.di.apdc.indiv.util.LoginData;
+import pt.unl.fct.di.apdc.indiv.util.User;
+import pt.unl.fct.di.apdc.indiv.util.data.LoginData;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
-    private final Gson gson = new Gson();
-    private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Gson gson = new Gson();
 
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(LoginData data) {
-        LOG.fine("Login attempt for identifier: " + data.getIdentifier());
+    public Response doLogin(LoginData data) {
+        LOG.info("Login attempt for: " + data.identifier);
 
         try {
-            Query<Entity> query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .setFilter(CompositeFilter.or(
-                            PropertyFilter.eq("username", data.getIdentifier()),
-                            PropertyFilter.eq("email", data.getIdentifier())))
+            if (data.identifier == null || data.password == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(gson.toJson("Identifier and password are required."))
+                        .build();
+            }
+
+            // Search user by username or email
+            Entity userEntity = null;
+            
+            // Try to find by username
+            Key usernameKey = datastore.newKeyFactory().setKind("User").newKey(data.identifier);
+            userEntity = datastore.get(usernameKey);
+            
+            // If not found by username, try by email
+            if (userEntity == null) {
+                Query<Entity> query = Query.newEntityQueryBuilder()
+                        .setKind("User")
+                        .setFilter(StructuredQuery.PropertyFilter.eq("email", data.identifier))
+                        .build();
+                QueryResults<Entity> results = datastore.run(query);
+                if (results.hasNext()) {
+                    userEntity = results.next();
+                }
+            }
+
+            if (userEntity == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("Invalid credentials."))
+                        .build();
+            }
+
+            User user = User.fromEntity(userEntity);
+            
+            // Verify password
+            if (!user.isPasswordValid(data.password)) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("Invalid credentials."))
+                        .build();
+            }
+
+            // Check if account is activated
+            if (user.getAccountState() != User.AccountState.ACTIVATED) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(gson.toJson("Account is not activated."))
+                        .build();
+            }
+
+            // Create authentication token
+            AuthToken token = new AuthToken(user.getUsername(), user.getRole().name());
+            
+            // Save token in Datastore
+            datastore.put(token.toEntity(datastore));
+
+            // Create response
+            LoginResponse response = new LoginResponse(token);
+            
+            return Response.ok(gson.toJson(response)).build();
+
+        } catch (Exception e) {
+            LOG.severe("Error during login: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(gson.toJson("Internal error processing login."))
                     .build();
-            QueryResults<Entity> results = datastore.run(query);
-
-            if (!results.hasNext()) {
-                throw new AppException(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid credentials");
-            }
-
-            Entity userEntity = results.next();
-            if (!userEntity.getString("password").equals(data.getPassword())) {
-                throw new AppException(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid credentials");
-            }
-
-            AuthToken token = new AuthToken(userEntity.getString("username"), userEntity.getString("role"));
-            return Response.ok(gson.toJson(new LoginResponse(token))).build();
-        } catch (AppException e) {
-            LOG.warning("Login failed: " + e.getMessage());
-            return Response.status(e.getStatus()).entity(gson.toJson(new ErrorResponse(e.getMessage()))).build();
-        }
-    }
-
-    private static class ErrorResponse {
-        public String error;
-        public ErrorResponse(String error) {
-            this.error = error;
         }
     }
 
     private static class LoginResponse {
-        public TokenResponse token;
-        public LoginResponse(AuthToken token) {
-            this.token = new TokenResponse(token);
+        public final TokenInfo token;
+
+        public LoginResponse(AuthToken authToken) {
+            this.token = new TokenInfo(authToken);
         }
     }
 
-    private static class TokenResponse {
-        public String user;
-        public String role;
-        public Validity validity;
-        public TokenResponse(AuthToken token) {
-            this.user = token.getUsername();
-            this.role = token.getRole();
-            this.validity = new Validity(token.getValidFrom(), token.getValidTo(), token.getVerifier());
+    private static class TokenInfo {
+        public final UserInfo user;
+        public final ValidityInfo validity;
+
+        public TokenInfo(AuthToken token) {
+            this.user = new UserInfo(token.getUsername(), token.getRole());
+            this.validity = new ValidityInfo(token);
         }
     }
 
-    private static class Validity {
-        public String validFrom;
-        public String validTo;
-        public String verifier;
-        public Validity(String validFrom, String validTo, String verifier) {
-            this.validFrom = validFrom;
-            this.validTo = validTo;
-            this.verifier = verifier;
+    private static class UserInfo {
+        public final String user;
+        public final String role;
+
+        public UserInfo(String username, String role) {
+            this.user = username;
+            this.role = role;
+        }
+    }
+
+    private static class ValidityInfo {
+        public final String valid_from;
+        public final String valid_to;
+        public final String verifier;
+
+        public ValidityInfo(AuthToken token) {
+            this.valid_from = new java.util.Date(token.getCreationDate()).toInstant().toString();
+            this.valid_to = new java.util.Date(token.getExpirationDate()).toInstant().toString();
+            this.verifier = token.getVerifier();
         }
     }
 }

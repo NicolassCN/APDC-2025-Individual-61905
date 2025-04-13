@@ -18,8 +18,8 @@
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
 
-	    <app.deploy.projectId>root-app-453615-f3</app.deploy.projectId>
-		<app.deploy.version>5</app.deploy.version>
+	    <app.deploy.projectId>indiv-project-456220</app.deploy.projectId>
+		<app.deploy.version>1</app.deploy.version>
   </properties>
 
 	<dependencyManagement>
@@ -190,13 +190,11 @@
             <version>2.0.9</version>
         </dependency>
 
-		<!-- Gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
 
 	</dependencies>
 

@@ -1,45 +1,73 @@
 package pt.unl.fct.di.apdc.indiv.filters;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
 
-@Provider
-public class AuthenticationFilter implements ContainerRequestFilter {
-    private static final Logger LOG = Logger.getLogger(AuthenticationFilter.class.getName());
-    private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
+public class AuthenticationFilter implements Filter {
+    private static final Datastore datastore = DatastoreOptions.newBuilder()
+            .setProjectId("indiv-project-456220")
+            .build()
+            .getService();
 
     @Override
-    public void filter(ContainerRequestContext context) throws IOException {
-        String path = context.getUriInfo().getPath();
-        if (path.endsWith("/register") || path.endsWith("/login")) {
-            return; // Skip authentication for public endpoints
-        }
+    public void init(FilterConfig filterConfig) {}
 
-        String authHeader = context.getHeaderString(AUTH_HEADER);
-        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            LOG.warning("Missing or invalid Authorization header");
-            context.abortWith(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"error\": \"Authorization header missing or invalid\"}").build());
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+
+        String path = req.getServletPath();
+        if (path.equals("/rest/register") || path.equals("/rest/login")) {
+            chain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(BEARER_PREFIX.length()).trim();
-        AuthToken authToken = AuthToken.validate(token);
-        if (authToken == null) {
-            LOG.warning("Invalid JWT token");
-            context.abortWith(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"error\": \"Invalid token\"}").build());
+        String authHeader = req.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
             return;
         }
 
-        context.setProperty("authToken", authToken);
-        LOG.fine("Authenticated user: " + authToken.getUsername());
+        String tokenId = authHeader.substring(7);
+        try {
+            Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(tokenId);
+            Entity tokenEntity = datastore.get(tokenKey);
+            
+            if (tokenEntity == null) {
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                return;
+            }
+            
+            long expirationDate = tokenEntity.getLong("expirationDate");
+            if (System.currentTimeMillis() > expirationDate) {
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+                return;
+            }
+            
+            AuthToken authToken = AuthToken.fromEntity(tokenEntity);
+            req.setAttribute("authToken", authToken);
+            chain.doFilter(request, response);
+        } catch (Exception e) {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: " + e.getMessage());
+        }
     }
+
+    @Override
+    public void destroy() {}
 }

@@ -40,13 +40,20 @@ public class UpdateUserAttributesResource {
             AuthToken token = (AuthToken) context.getProperty("authToken");
             Query<Entity> query = Query.newEntityQueryBuilder()
                     .setKind("User")
-                    .setFilter(StructuredQuery.CompositeFilter.or(
-                            StructuredQuery.PropertyFilter.eq("username", data.getIdentifier()),
-                            StructuredQuery.PropertyFilter.eq("email", data.getIdentifier())))
+                    .setFilter(StructuredQuery.PropertyFilter.eq("username", data.getIdentifier()))
                     .build();
             QueryResults<Entity> results = datastore.run(query);
+            
             if (!results.hasNext()) {
-                throw new AppException(Response.Status.NOT_FOUND.getStatusCode(), "User not found");
+                // Try searching by email if username search failed
+                query = Query.newEntityQueryBuilder()
+                        .setKind("User")
+                        .setFilter(StructuredQuery.PropertyFilter.eq("email", data.getIdentifier()))
+                        .build();
+                results = datastore.run(query);
+                if (!results.hasNext()) {
+                    throw new AppException(Response.Status.NOT_FOUND.getStatusCode(), "User not found");
+                }
             }
 
             Entity userEntity = results.next();

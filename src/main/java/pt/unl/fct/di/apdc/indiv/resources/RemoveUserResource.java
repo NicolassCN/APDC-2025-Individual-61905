@@ -2,82 +2,121 @@ package pt.unl.fct.di.apdc.indiv.resources;
 
 import java.util.logging.Logger;
 
-import com.google.appengine.repackaged.com.google.gson.Gson;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.exceptions.AppException;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
+import pt.unl.fct.di.apdc.indiv.util.User;
 import pt.unl.fct.di.apdc.indiv.util.data.RemoveUserData;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RemoveUserResource {
     private static final Logger LOG = Logger.getLogger(RemoveUserResource.class.getName());
-    private final Gson gson = new Gson();
-    private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Gson gson = new Gson();
 
     @POST
     @Path("/remove")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeUser(@Context ContainerRequestContext context, RemoveUserData data) {
-        LOG.fine("Remove user attempt for identifier: " + data.getIdentifier());
+    public Response removeUser(@HeaderParam("Authorization") String authHeader, RemoveUserData data) {
+        LOG.info("Attempting to remove user: " + data.identificador);
 
         try {
-            AuthToken token = (AuthToken) context.getProperty("authToken");
-            if (!token.getRole().equals("BACKOFFICE") && !token.getRole().equals("ADMIN")) {
-                throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("Authentication token is required."))
+                        .build();
             }
 
-            Query<Entity> query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .setFilter(StructuredQuery.CompositeFilter.or(
-                            StructuredQuery.PropertyFilter.eq("username", data.getIdentifier()),
-                            StructuredQuery.PropertyFilter.eq("email", data.getIdentifier())))
-                    .build();
-            QueryResults<Entity> results = datastore.run(query);
-            if (!results.hasNext()) {
-                throw new AppException(Response.Status.NOT_FOUND.getStatusCode(), "User not found");
+            String tokenId = authHeader.substring("Bearer ".length());
+            Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(tokenId);
+            Entity tokenEntity = datastore.get(tokenKey);
+
+            if (tokenEntity == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("Invalid token."))
+                        .build();
             }
 
-            Entity user = results.next();
-            if (token.getRole().equals("BACKOFFICE")) {
-                String userRole = user.getString("role");
-                if (!userRole.equals("ENDUSER") && !userRole.equals("PARTNER")) {
-                    throw new AppException(Response.Status.FORBIDDEN.getStatusCode(), "Insufficient permissions");
+            AuthToken token = AuthToken.fromEntity(tokenEntity);
+            if (token.isExpired()) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("Token expired."))
+                        .build();
+            }
+
+            Key requesterKey = datastore.newKeyFactory().setKind("User").newKey(token.getUsername());
+            Entity requesterEntity = datastore.get(requesterKey);
+            if (requesterEntity == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson("User not found."))
+                        .build();
+            }
+
+            User requester = User.fromEntity(requesterEntity);
+
+            Entity targetEntity = null;
+            String targetIdentifier = data.identificador;
+
+            Key usernameKey = datastore.newKeyFactory().setKind("User").newKey(targetIdentifier);
+            targetEntity = datastore.get(usernameKey);
+
+            if (targetEntity == null) {
+                Query<Entity> query = Query.newEntityQueryBuilder()
+                        .setKind("User")
+                        .setFilter(StructuredQuery.PropertyFilter.eq("email", targetIdentifier))
+                        .build();
+                QueryResults<Entity> results = datastore.run(query);
+                if (results.hasNext()) {
+                    targetEntity = results.next();
                 }
             }
 
-            datastore.delete(user.getKey());
-            return Response.ok(gson.toJson(new RemoveUserResponse("User removed successfully", data.getIdentifier()))).build();
-        } catch (AppException e) {
-            LOG.warning("Remove user failed: " + e.getMessage());
-            return Response.status(e.getStatus()).entity(gson.toJson(new ErrorResponse(e.getMessage()))).build();
-        }
-    }
+            if (targetEntity == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(gson.toJson("Target user not found."))
+                        .build();
+            }
 
-    private static class ErrorResponse {
-        public String error;
-        public ErrorResponse(String error) {
-            this.error = error;
+            User target = User.fromEntity(targetEntity);
+
+            if (!requester.canRemoveUser(target)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(gson.toJson("Insufficient permissions to remove this account."))
+                        .build();
+            }
+
+            datastore.delete(targetEntity.getKey());
+
+            return Response.ok(gson.toJson(new RemoveUserResponse("Account removed successfully.", targetIdentifier)))
+                    .build();
+
+        } catch (Exception e) {
+            LOG.severe("Error removing user: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(gson.toJson("Internal error processing user removal."))
+                    .build();
         }
     }
 
     private static class RemoveUserResponse {
-        public String message;
-        public String identifier;
+        public final String message;
+        public final String identifier;
+
         public RemoveUserResponse(String message, String identifier) {
             this.message = message;
             this.identifier = identifier;

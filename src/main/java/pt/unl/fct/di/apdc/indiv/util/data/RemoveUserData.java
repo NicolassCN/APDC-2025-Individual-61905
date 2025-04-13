@@ -1,11 +1,12 @@
 package pt.unl.fct.di.apdc.indiv.util.data;
 
 public class RemoveUserData {
-    private String identifier;
+    public String identificador;
 
-    public RemoveUserData() {}
+    public RemoveUserData() {
+    }
 
-    public String getIdentifier() {
-        return identifier;
+    public RemoveUserData(String identificador) {
+        this.identificador = identificador;
     }
 }

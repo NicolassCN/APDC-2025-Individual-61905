@@ -1,15 +1,25 @@
 package pt.unl.fct.di.apdc.indiv.util.data;
 
 public class RegisterData {
-    private String email;
-    private String username;
-    private String fullName;
-    private String phone;
-    private String password;
-    private String confirmPassword;
-    private String profile;
+    public String email;
+    public String username;
+    public String fullName;
+    public String phone;
+    public String password;
+    public String confirmPassword;
+    public String profile;
+    
+    // Atributos opcionais
+    public String citizenId;
+    public String taxId;
+    public String employer;
+    public String position;
+    public String address;
+    public String employerTaxId;
+    public String photo;
 
-    public RegisterData() {}
+    public RegisterData() {
+    }
 
     public String getEmail() {
         return email;

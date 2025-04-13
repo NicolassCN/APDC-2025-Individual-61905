@@ -1,16 +1,15 @@
 package pt.unl.fct.di.apdc.indiv.util.data;
 
 public class ChangeAccountStateData {
-    private String username;
-    private String newState;
+    
+    public String username;
+    public String newState;
 
-    public ChangeAccountStateData() {}
-
-    public String getUsername() {
-        return username;
+    public ChangeAccountStateData() {
     }
 
-    public String getNewState() {
-        return newState;
+    public ChangeAccountStateData(String username, String newState) {
+        this.username = username;
+        this.newState = newState;
     }
 }
