@@ -99,7 +99,7 @@ public class RegisterResource {
                 hashedPassword,
                 data.profile,
                 "ENDUSER", // Default role
-                "DEACTIVATED" // Default state
+                "ACTIVATED" // Changed from DEACTIVATED to ACTIVATED
             );
 
             // Set optional fields if provided

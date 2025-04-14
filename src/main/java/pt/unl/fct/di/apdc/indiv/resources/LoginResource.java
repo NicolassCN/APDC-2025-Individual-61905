@@ -62,7 +62,7 @@ public class LoginResource {
 
             if (userEntity == null) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity(gson.toJson("Invalid credentials."))
+                        .entity(gson.toJson("User not found. Please check your username/email."))
                         .build();
             }
 
@@ -71,14 +71,14 @@ public class LoginResource {
             // Verify password
             if (!user.isPasswordValid(data.password)) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity(gson.toJson("Invalid credentials."))
+                        .entity(gson.toJson("Invalid password. Please try again."))
                         .build();
             }
 
             // Check if account is activated
             if (user.getAccountState() != User.AccountState.ACTIVATED) {
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity(gson.toJson("Account is not activated."))
+                        .entity(gson.toJson("Your account is not activated. Please contact support."))
                         .build();
             }
 

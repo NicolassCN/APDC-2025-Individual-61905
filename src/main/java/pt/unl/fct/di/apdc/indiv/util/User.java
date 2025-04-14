@@ -77,7 +77,7 @@ public class User {
     public void setPhoto(String photo) { this.photo = photo; }
 
     public boolean isPasswordValid(String password) {
-        return this.password.equals(password);
+        return UserValidator.checkPassword(password, this.password);
     }
 
     public boolean canChangeRole(User target) {

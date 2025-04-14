@@ -22,7 +22,7 @@ public class AppInitializer implements ServletContextListener {
 
             Key key = datastore.newKeyFactory().setKind("User").newKey("root");
             if (datastore.get(key) == null) {
-                String hashedPassword = BCrypt.hashpw("RootAdmin123!", BCrypt.gensalt());
+                String hashedPassword = BCrypt.hashpw("root", BCrypt.gensalt());
                 User root = new User(
                         "root",
                         "root@admin.com",
