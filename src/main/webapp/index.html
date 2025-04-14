@@ -1,29 +1,132 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>ADC: My First Web App</title>
-  </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APDC Individual Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .api-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .api-endpoint {
+            font-family: monospace;
+            background-color: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .endpoint-group {
+            margin-bottom: 20px;
+        }
+        .endpoint-group h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .endpoint-description {
+            margin-left: 20px;
+            color: #666;
+        }
+        .role-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e1f5fe;
+            border-radius: 4px;
+        }
+        .role-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .role-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .role-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #0288d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>APDC Individual Project</h1>
+        <p>Welcome to the APDC Individual Project API. This is a RESTful web service that provides user management functionality with role-based access control.</p>
+        
+        <div class="api-info">
+            <h2>Available Endpoints</h2>
+            <p>Base URL: <span class="api-endpoint">/rest</span></p>
 
-  <body>
-    <h1>Welcome to this very simple web application!</h1>
+            <div class="endpoint-group">
+                <h3>Authentication</h3>
+                <ul>
+                    <li><span class="api-endpoint">POST /user/register</span>
+                        <div class="endpoint-description">Register a new user</div>
+                    </li>
+                    <li><span class="api-endpoint">POST /user/login</span>
+                        <div class="endpoint-description">Login with username/email and password</div>
+                    </li>
+                    <li><span class="api-endpoint">POST /user/logout</span>
+                        <div class="endpoint-description">Logout current user</div>
+                    </li>
+                </ul>
+            </div>
 
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Services:</td>        
-      </tr>
-      <tr>
-        <td><a href='https://www.di.fct.unl.pt'>DI-FCT-UNL</a></td><td>(greetings)</td>
-      </tr>
-      <tr>
-        <td><a href='/api/utils/hello'>Say Hello!</a></td><td>(greetings)</td>
-      </tr>
-      <tr>
-        <td><a href='/api/utils/time'>What time is it?</a></td><td>(see server time)</td>
-      </tr>
-    </table>
-  </body>
-  <footer>
-  	Copyright: ADC-PEI, FCT NOVA 2025
-  </footer>
+            <div class="endpoint-group">
+                <h3>User Management</h3>
+                <ul>
+                    <li><span class="api-endpoint">GET /user/{username}</span>
+                        <div class="endpoint-description">Get user information</div>
+                    </li>
+                    <li><span class="api-endpoint">PUT /user/{username}/role</span>
+                        <div class="endpoint-description">Change user role (ADMIN only)</div>
+                    </li>
+                    <li><span class="api-endpoint">PUT /user/{username}/status</span>
+                        <div class="endpoint-description">Toggle user status (GBO and above)</div>
+                    </li>
+                    <li><span class="api-endpoint">GET /user/list</span>
+                        <div class="endpoint-description">List all users (GBO and above)</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="role-info">
+            <h2>Role Hierarchy</h2>
+            <p>The system implements the following role hierarchy (from highest to lowest privileges):</p>
+            <ul class="role-list">
+                <li><strong>ADMIN</strong> - Full system access</li>
+                <li><strong>SU</strong> (Super User) - Advanced system management</li>
+                <li><strong>GS</strong> (Global System) - System-wide operations</li>
+                <li><strong>GBO</strong> (Global Back Office) - Back office operations</li>
+                <li><strong>USER</strong> - Basic user access</li>
+            </ul>
+        </div>
+    </div>
+</body>
 </html>

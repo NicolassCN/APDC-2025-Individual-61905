@@ -6,181 +6,188 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.filters.AuthenticationFilter;
 import pt.unl.fct.di.apdc.indiv.util.AuthToken;
 import pt.unl.fct.di.apdc.indiv.util.User;
 import pt.unl.fct.di.apdc.indiv.util.UserValidator;
-import pt.unl.fct.di.apdc.indiv.util.UserValidator.ValidationResult;
-import pt.unl.fct.di.apdc.indiv.util.data.UserData.ChangePasswordData;
-import pt.unl.fct.di.apdc.indiv.util.data.UserData.LoginData;
-import pt.unl.fct.di.apdc.indiv.util.data.UserData.LogoutData;
 
-@Path("/api/auth")
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+@Path("/auth")
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
     private static final Logger LOG = Logger.getLogger(AuthResource.class.getName());
-    private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private final Datastore datastore;
+    private final KeyFactory userKeyFactory;
     private final Gson g = new Gson();
+
+    public AuthResource() {
+        this.datastore = DatastoreOptions.getDefaultInstance().getService();
+        this.userKeyFactory = datastore.newKeyFactory().setKind("User");
+    }
 
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response register(User user) {
-        LOG.fine("Register attempt for user: " + user.getUsername());
-
-        ValidationResult validationResult = UserValidator.validateUser(user);
+        UserValidator.ValidationResult validationResult = UserValidator.validateUser(user);
         if (!validationResult.isValid()) {
-            LOG.warning("Registration attempt with invalid data: " + validationResult.getMessage());
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(g.toJson(validationResult.getMessage()))
-                    .build();
-        }
-
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(user.getUsername());
-        Entity existingUser = datastore.get(userKey);
-        if (existingUser != null) {
-            LOG.warning("Registration attempt with existing username: " + user.getUsername());
-            return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Username already exists"))
+                    .entity("Invalid user data: " + validationResult.getMessage())
                     .build();
         }
 
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("User")
-                .setFilter(StructuredQuery.PropertyFilter.eq("email", user.getEmail()))
+                .setFilter(StructuredQuery.CompositeFilter.and(
+                        StructuredQuery.PropertyFilter.eq("username", user.getUsername()),
+                        StructuredQuery.PropertyFilter.eq("email", user.getEmail())))
                 .build();
+
         QueryResults<Entity> results = datastore.run(query);
         if (results.hasNext()) {
-            LOG.warning("Registration attempt with existing email: " + user.getEmail());
             return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Email already in use"))
+                    .entity("Username or email already exists")
                     .build();
         }
 
-        Entity userEntity = user.toEntity(userKey);
-        datastore.put(userEntity);
-
-        LOG.info("User registered successfully: " + user.getUsername());
-        return Response.status(Response.Status.CREATED)
-                .entity(g.toJson(new RegisterResponse("Account created successfully", user)))
+        Key userKey = userKeyFactory.newKey(user.getUsername());
+        Entity userEntity = Entity.newBuilder(userKey)
+                .set("username", user.getUsername())
+                .set("email", user.getEmail())
+                .set("password", user.getPassword())
+                .set("name", user.getName())
+                .set("phone", user.getPhone())
+                .set("address", user.getAddress())
+                .set("nif", user.getNif())
+                .set("cc", user.getCc())
+                .set("role", user.getRole().toString())
+                .set("isActive", user.isActive())
+                .set("token", "")
                 .build();
+
+        datastore.put(userEntity);
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(LoginData data) {
-        LOG.fine("Login attempt for user: " + data.identifier);
-
-        Entity user = null;
-        
-        // Try to find user by username
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.identifier);
-        user = datastore.get(userKey);
-        
-        // If not found by username, try email
-        if (user == null) {
-            Query<Entity> query = Query.newEntityQueryBuilder()
-                    .setKind("User")
-                    .setFilter(StructuredQuery.PropertyFilter.eq("email", data.identifier))
+    public Response login(LoginData loginData) {
+        if (loginData.getUsername() == null || loginData.getPassword() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing credentials")
                     .build();
-            QueryResults<Entity> results = datastore.run(query);
-            if (results.hasNext()) {
-                user = results.next();
-            }
         }
 
-        if (user == null) {
-            LOG.warning("Failed login attempt for identifier: " + data.identifier);
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("User")
+                .setFilter(StructuredQuery.PropertyFilter.eq("username", loginData.getUsername()))
+                .build();
+
+        QueryResults<Entity> results = datastore.run(query);
+        if (!results.hasNext()) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(g.toJson("Invalid credentials"))
+                    .entity("Invalid credentials")
                     .build();
         }
 
-        User u = User.fromEntity(user);
-        if (!u.getPassword().equals(data.password)) {
-            LOG.warning("Failed login attempt for user: " + u.getUsername());
+        Entity userEntity = results.next();
+        if (!userEntity.getString("password").equals(loginData.getPassword())) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(g.toJson("Invalid credentials"))
+                    .entity("Invalid credentials")
                     .build();
         }
 
-        if (!u.isActive()) {
-            LOG.warning("Failed login attempt for inactive user: " + u.getUsername());
-            return Response.status(Response.Status.FORBIDDEN)
-                    .entity(g.toJson("Account is not active"))
-                    .build();
-        }
-
-        AuthToken token = new AuthToken(u.getUsername(), u.getRole());
-        AuthenticationFilter.addToken(u.getUsername(), token);
-
-        LOG.info("User logged in successfully: " + u.getUsername());
-        return Response.ok(g.toJson(token)).build();
+        User user = entityToUser(userEntity);
+        AuthToken token = new AuthToken(user.getUsername(), user.getRole());
+        return Response.ok(token).build();
     }
 
     @POST
     @Path("/logout")
-    public Response logout(LogoutData data) {
-        String username = AuthenticationFilter.getUsernameFromToken(data.token);
-        if (username == null) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response logout(@HeaderParam("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(g.toJson("Invalid or expired session"))
+                    .entity("No token provided")
                     .build();
         }
 
-        AuthenticationFilter.removeToken(username);
-        return Response.ok(g.toJson("Logout successful. Session has been terminated.")).build();
+        Transaction txn = datastore.newTransaction();
+        try {
+            Query<Entity> query = Query.newEntityQueryBuilder()
+                    .setKind("User")
+                    .setFilter(StructuredQuery.PropertyFilter.eq("token", token))
+                    .build();
+            QueryResults<Entity> results = txn.run(query);
+
+            if (!results.hasNext()) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("Invalid token")
+                        .build();
+            }
+
+            Entity userEntity = results.next();
+            Entity updatedUser = Entity.newBuilder(userEntity)
+                    .set("token", "")
+                    .build();
+            txn.put(updatedUser);
+            txn.commit();
+
+            return Response.ok("Logout successful").build();
+        } catch (Exception e) {
+            txn.rollback();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error during logout: " + e.getMessage())
+                    .build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
-    @POST
-    @Path("/change-password")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response changePassword(ChangePasswordData data) {
-        AuthToken token = AuthenticationFilter.getTokenFromUsername(data.username);
-        if (token == null || !token.isValid()) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(g.toJson("Invalid or expired session"))
-                    .build();
+    private User entityToUser(Entity entity) {
+        User user = new User(
+                entity.getKey().getName(),
+                entity.getString("password"),
+                entity.getString("email"),
+                entity.getString("name"),
+                entity.getString("phone"),
+                entity.getString("address"),
+                entity.getString("nif"),
+                entity.getString("cc")
+        );
+        user.setRole(User.Role.valueOf(entity.getString("role")));
+        user.setActive(entity.getBoolean("isActive"));
+        if (entity.contains("token")) {
+            user.setToken(entity.getString("token"));
+        }
+        return user;
+    }
+
+    private static class LoginData {
+        private String username;
+        private String password;
+
+        public String getUsername() {
+            return username;
         }
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Entity userEntity = datastore.get(userKey);
-        if (userEntity == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(g.toJson("User not found"))
-                    .build();
+        public String getPassword() {
+            return password;
         }
-
-        User user = User.fromEntity(userEntity);
-        if (!user.getPassword().equals(data.currentPassword)) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(g.toJson("Current password is incorrect"))
-                    .build();
-        }
-
-        ValidationResult validationResult = UserValidator.validatePasswordChange(
-            data.currentPassword, data.newPassword, data.confirmPassword);
-        if (!validationResult.isValid()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(g.toJson(validationResult.getMessage()))
-                    .build();
-        }
-
-        user.setPassword(data.newPassword);
-        datastore.put(user.toEntity(userKey));
-
-        return Response.ok(g.toJson("Password changed successfully")).build();
     }
 } 

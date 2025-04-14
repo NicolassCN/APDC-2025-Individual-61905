@@ -1,69 +1,45 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class AuthToken {
+	private final String tokenId;
+	private final String username;
+	private final User.Role role;
+	private final long creationTime;
+	private final long expirationTime;
+	private static final long TOKEN_EXPIRATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
 
-	private String user;
-	private String role;
-	private TokenValidity validity;
-	
-	public static class TokenValidity {
-		private String valid_from;
-		private String valid_to;
-		private String verificador;
-		
-		public TokenValidity() {
-			Instant now = Instant.now();
-			this.valid_from = now.toString();
-			this.valid_to = now.plus(2, ChronoUnit.HOURS).toString();
-			this.verificador = UUID.randomUUID().toString();
-		}
-		
-		public String getValid_from() {
-			return valid_from;
-		}
-		
-		public String getValid_to() {
-			return valid_to;
-		}
-		
-		public String getVerificador() {
-			return verificador;
-		}
-		
-		public boolean isValid() {
-			Instant now = Instant.now();
-			Instant validTo = Instant.parse(valid_to);
-			return now.isBefore(validTo);
-		}
-	}
-	
-	public AuthToken(String user, String role) {
-		this.user = user;
+	public AuthToken(String username, User.Role role) {
+		this.tokenId = UUID.randomUUID().toString();
+		this.username = username;
 		this.role = role;
-		this.validity = new TokenValidity();
+		this.creationTime = Instant.now().toEpochMilli();
+		this.expirationTime = this.creationTime + TOKEN_EXPIRATION;
 	}
-	
-	public String getUser() {
-		return user;
+
+	public String getTokenId() {
+		return tokenId;
 	}
-	
-	public String getRole() {
+
+	public String getUsername() {
+		return username;
+	}
+
+	public User.Role getRole() {
 		return role;
 	}
-	
-	public TokenValidity getValidity() {
-		return validity;
+
+	public long getCreationTime() {
+		return creationTime;
 	}
-	
+
+	public long getExpirationTime() {
+		return expirationTime;
+	}
+
 	public boolean isValid() {
-		return validity.isValid();
-	}
-	
-	public String getTokenID() {
-		return validity.getVerificador();
+		return Instant.now().toEpochMilli() < expirationTime;
 	}
 }

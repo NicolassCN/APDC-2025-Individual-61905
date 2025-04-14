@@ -1,184 +1,96 @@
 package pt.unl.fct.di.apdc.indiv.util;
 
-import java.util.Date;
-
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 
-public class WorkSheet {
-    private Long id;
-    private String username;
+public class Worksheet {
+    public enum State {
+        PENDING,
+        IN_PROGRESS,
+        COMPLETED,
+        CANCELLED
+    }
+
+    private String id;
     private String title;
     private String description;
-    private Date startDate;
-    private Date endDate;
-    private String status;
-    private String priority;
-    private String category;
-    private String[] tags;
-    private String[] attachments;
-    private Date createdAt;
-    private Date updatedAt;
+    private String partnerId;
+    private State state;
+    private String createdBy;
+    private String createdAt;
+    private String lastModified;
+    private String completedAt;
 
-    public WorkSheet() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-        this.status = "PENDING";
+    public Worksheet() {
+        this.state = State.PENDING;
+        this.createdAt = java.time.Instant.now().toString();
+        this.lastModified = this.createdAt;
     }
 
-    public WorkSheet(String username, String title, String description) {
-        this();
-        this.username = username;
-        this.title = title;
-        this.description = description;
+    // Getters and Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getPartnerId() { return partnerId; }
+    public void setPartnerId(String partnerId) { this.partnerId = partnerId; }
+
+    public State getState() { return state; }
+    public void setState(State state) { 
+        this.state = state;
+        this.lastModified = java.time.Instant.now().toString();
+        if (state == State.COMPLETED) {
+            this.completedAt = this.lastModified;
+        }
     }
 
-    public Long getId() {
-        return id;
-    }
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getLastModified() { return lastModified; }
+    public void setLastModified(String lastModified) { this.lastModified = lastModified; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getCompletedAt() { return completedAt; }
+    public void setCompletedAt(String completedAt) { this.completedAt = completedAt; }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPriority() {
-        return priority;
-    }
-
-    public void setPriority(String priority) {
-        this.priority = priority;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String[] getTags() {
-        return tags;
-    }
-
-    public void setTags(String[] tags) {
-        this.tags = tags;
-    }
-
-    public String[] getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(String[] attachments) {
-        this.attachments = attachments;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Entity toEntity(Key workSheetKey) {
-        return Entity.newBuilder(workSheetKey)
-                .set("username", this.username)
+    public Entity toEntity(Key worksheetKey) {
+        Entity.Builder builder = Entity.newBuilder(worksheetKey)
                 .set("title", this.title)
                 .set("description", this.description)
-                .set("startDate", this.startDate != null ? this.startDate.getTime() : 0)
-                .set("endDate", this.endDate != null ? this.endDate.getTime() : 0)
-                .set("status", this.status)
-                .set("priority", this.priority != null ? this.priority : "")
-                .set("category", this.category != null ? this.category : "")
-                .set("tags", this.tags != null ? String.join(",", this.tags) : "")
-                .set("attachments", this.attachments != null ? String.join(",", this.attachments) : "")
-                .set("createdAt", this.createdAt.getTime())
-                .set("updatedAt", this.updatedAt.getTime())
-                .build();
+                .set("partnerId", this.partnerId)
+                .set("state", this.state.toString())
+                .set("createdBy", this.createdBy)
+                .set("createdAt", this.createdAt)
+                .set("lastModified", this.lastModified);
+        
+        if (this.completedAt != null) {
+            builder.set("completedAt", this.completedAt);
+        }
+        
+        return builder.build();
     }
 
-    public static WorkSheet fromEntity(Entity entity) {
-        WorkSheet workSheet = new WorkSheet();
-        workSheet.setId(entity.getKey().getId());
-        workSheet.setUsername(entity.getString("username"));
-        workSheet.setTitle(entity.getString("title"));
-        workSheet.setDescription(entity.getString("description"));
-        workSheet.setStartDate(new Date(entity.getLong("startDate")));
-        workSheet.setEndDate(new Date(entity.getLong("endDate")));
-        workSheet.setStatus(entity.getString("status"));
-        workSheet.setPriority(entity.getString("priority"));
-        workSheet.setCategory(entity.getString("category"));
-        
-        String tags = entity.getString("tags");
-        if (!tags.isEmpty()) {
-            workSheet.setTags(tags.split(","));
+    public static Worksheet fromEntity(Entity entity) {
+        Worksheet worksheet = new Worksheet();
+        worksheet.setId(entity.getKey().getName());
+        worksheet.setTitle(entity.getString("title"));
+        worksheet.setDescription(entity.getString("description"));
+        worksheet.setPartnerId(entity.getString("partnerId"));
+        worksheet.setState(State.valueOf(entity.getString("state")));
+        worksheet.setCreatedBy(entity.getString("createdBy"));
+        worksheet.setCreatedAt(entity.getString("createdAt"));
+        worksheet.setLastModified(entity.getString("lastModified"));
+        if (entity.contains("completedAt")) {
+            worksheet.setCompletedAt(entity.getString("completedAt"));
         }
-        
-        String attachments = entity.getString("attachments");
-        if (!attachments.isEmpty()) {
-            workSheet.setAttachments(attachments.split(","));
-        }
-        
-        workSheet.setCreatedAt(new Date(entity.getLong("createdAt")));
-        workSheet.setUpdatedAt(new Date(entity.getLong("updatedAt")));
-        
-        return workSheet;
+        return worksheet;
     }
 } 

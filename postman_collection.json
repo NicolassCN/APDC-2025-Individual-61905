@@ -1,16 +1,16 @@
 {
     "info": {
-        "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-        "name": "APDC-2025-Individual-61905",
-        "description": "Comprehensive test collection for the individual project",
+        "_postman_id": "1234567890",
+        "name": "APDC 2024 Individual Project",
+        "description": "Collection for testing the APDC 2024 Individual Project API endpoints",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "User Registration",
+            "name": "OP1 - User Registration",
             "item": [
                 {
-                    "name": "Successful Registration",
+                    "name": "Register Normal User",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -21,17 +21,17 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"utilizador@example.com\",\n    \"username\": \"utilizador123\",\n    \"nome_completo\": \"João Maria Santos\",\n    \"telefone\": \"+351912345678\",\n    \"password\": \"Exemplo123!\",\n    \"confirmar_password\": \"Exemplo123!\",\n    \"perfil\": \"publico\"\n}"
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"username\": \"normaluser\",\n    \"nome_completo\": \"Normal User Test\",\n    \"telefone\": \"+351912345678\",\n    \"password\": \"2024adcAVALind!!!\",\n    \"confirmar_password\": \"2024adcAVALind!!!\",\n    \"perfil\": \"publico\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/register",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/register",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "register"]
                         }
                     }
                 },
                 {
-                    "name": "Registration with Missing Fields",
+                    "name": "Register User with Optional Fields",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -42,17 +42,17 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"utilizador@example.com\",\n    \"username\": \"utilizador123\"\n}"
+                            "raw": "{\n    \"email\": \"complete@example.com\",\n    \"username\": \"completeuser\",\n    \"nome_completo\": \"Complete User Test\",\n    \"telefone\": \"+351923456789\",\n    \"password\": \"2024adcAVALind!!!\",\n    \"confirmar_password\": \"2024adcAVALind!!!\",\n    \"perfil\": \"privado\",\n    \"cartao_cidadao\": \"12345678\",\n    \"nif\": \"123456789\",\n    \"entidade_empregadora\": \"Smart Forest S.A.\",\n    \"funcao\": \"Técnico de Floresta\",\n    \"morada\": \"Rua dos alunos de APDC2324, No 100\",\n    \"nif_entidade_empregadora\": \"177888999\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/register",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/register",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "register"]
                         }
                     }
                 },
                 {
-                    "name": "Registration with Invalid Email",
+                    "name": "Register Invalid Password",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -63,32 +63,11 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"invalid-email\",\n    \"username\": \"utilizador123\",\n    \"nome_completo\": \"João Maria Santos\",\n    \"telefone\": \"+351912345678\",\n    \"password\": \"Exemplo123!\",\n    \"confirmar_password\": \"Exemplo123!\",\n    \"perfil\": \"publico\"\n}"
+                            "raw": "{\n    \"email\": \"test@example.com\",\n    \"username\": \"testuser\",\n    \"nome_completo\": \"Test User\",\n    \"telefone\": \"+351934567890\",\n    \"password\": \"weak\",\n    \"confirmar_password\": \"weak\",\n    \"perfil\": \"publico\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/register",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "register"]
-                        }
-                    }
-                },
-                {
-                    "name": "Registration with Mismatched Passwords",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"utilizador@example.com\",\n    \"username\": \"utilizador123\",\n    \"nome_completo\": \"João Maria Santos\",\n    \"telefone\": \"+351912345678\",\n    \"password\": \"Exemplo123!\",\n    \"confirmar_password\": \"Different123!\",\n    \"perfil\": \"publico\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/register",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/register",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "register"]
                         }
                     }
@@ -96,10 +75,10 @@
             ]
         },
         {
-            "name": "Login",
+            "name": "OP2 - Login",
             "item": [
                 {
-                    "name": "Successful Login",
+                    "name": "Login with Username",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -110,17 +89,17 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"utilizador@example.com\",\n    \"password\": \"Exemplo123!\"\n}"
+                            "raw": "{\n    \"identificador\": \"normaluser\",\n    \"password\": \"2024adcAVALind!!!\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/login",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/login",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "login"]
                         }
                     }
                 },
                 {
-                    "name": "Login with Incorrect Password",
+                    "name": "Login with Email",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -131,17 +110,17 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"utilizador@example.com\",\n    \"password\": \"WrongPassword!\"\n}"
+                            "raw": "{\n    \"identificador\": \"user@example.com\",\n    \"password\": \"2024adcAVALind!!!\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/login",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/login",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "login"]
                         }
                     }
                 },
                 {
-                    "name": "Login with Non-existent User",
+                    "name": "Login Root Admin",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -152,11 +131,11 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"nonexistent@example.com\",\n    \"password\": \"Exemplo123!\"\n}"
+                            "raw": "{\n    \"identificador\": \"root\",\n    \"password\": \"RootAdmin123!\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/login",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/login",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "login"]
                         }
                     }
@@ -164,79 +143,54 @@
             ]
         },
         {
-            "name": "Change User Role",
+            "name": "OP3 - Change Role",
             "item": [
                 {
-                    "name": "Successful Role Change by ADMIN",
+                    "name": "Admin Changes User to Partner",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_role\": \"PARTNER\"\n}"
+                            "raw": "{\n    \"username\": \"normaluser\",\n    \"novo_role\": \"PARTNER\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-role",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-role",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-role"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted Role Change by ENDUSER",
+                    "name": "Backoffice Changes Partner to User",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{backoffice_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_role\": \"ADMIN\"\n}"
+                            "raw": "{\n    \"username\": \"normaluser\",\n    \"novo_role\": \"ENDUSER\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-role",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "change-role"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Role Change by BACKOFFICE with Invalid Role",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_role\": \"INVALID_ROLE\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/change-role",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-role",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-role"]
                         }
                     }
@@ -244,79 +198,54 @@
             ]
         },
         {
-            "name": "Change Account State",
+            "name": "OP4 - Change Account State",
             "item": [
                 {
-                    "name": "Successful State Change by ADMIN",
+                    "name": "Admin Activates Account",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_estado\": \"ATIVADA\"\n}"
+                            "raw": "{\n    \"username\": \"normaluser\",\n    \"novo_estado\": \"ATIVADA\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-account-state",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-account-state",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-account-state"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted State Change by BACKOFFICE to Invalid State",
+                    "name": "Backoffice Deactivates Account",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{backoffice_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_estado\": \"INVALID_STATE\"\n}"
+                            "raw": "{\n    \"username\": \"normaluser\",\n    \"novo_estado\": \"DESATIVADA\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-account-state",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "change-account-state"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted State Change by ENDUSER",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\",\n    \"novo_estado\": \"ATIVADA\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/change-account-state",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-account-state",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-account-state"]
                         }
                     }
@@ -324,79 +253,54 @@
             ]
         },
         {
-            "name": "Remove User Account",
+            "name": "OP5 - Remove User Account",
             "item": [
                 {
-                    "name": "Successful Removal by ADMIN",
+                    "name": "Admin Removes User by Email",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"utilizador123\"\n}"
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/remove",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/remove",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "remove"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted Removal by BACKOFFICE of ADMIN Account",
+                    "name": "Backoffice Removes Partner by Username",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{backoffice_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"adminuser\"\n}"
+                            "raw": "{\n    \"username\": \"partneruser\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/remove",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "remove"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Removal of Non-existent User",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"nonexistentuser\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/remove",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/remove",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "remove"]
                         }
                     }
@@ -404,20 +308,20 @@
             ]
         },
         {
-            "name": "List Users",
+            "name": "OP6 - List Users",
             "item": [
                 {
-                    "name": "Successful Listing by ADMIN",
+                    "name": "Admin Lists All Users",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
                         "body": {
@@ -425,24 +329,24 @@
                             "raw": "{}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/all",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/all",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "all"]
                         }
                     }
                 },
                 {
-                    "name": "Listing by ENDUSER with Restricted View",
+                    "name": "Backoffice Lists Users",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{backoffice_token}}"
                             }
                         ],
                         "body": {
@@ -450,24 +354,24 @@
                             "raw": "{}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/all",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/all",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "all"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted Listing by Unauthorized User",
+                    "name": "EndUser Lists Public Users",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
                             }
                         ],
                         "body": {
@@ -475,8 +379,8 @@
                             "raw": "{}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/all",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/all",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "all"]
                         }
                     }
@@ -484,79 +388,54 @@
             ]
         },
         {
-            "name": "Change Account Attributes",
+            "name": "OP7 - Change Account Attributes",
             "item": [
                 {
-                    "name": "Successful Attribute Change by ADMIN",
+                    "name": "User Updates Own Attributes",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"utilizador123\",\n    \"atributos\": {\n        \"nome\": \"Novo Nome\",\n        \"telefone\": \"+351912345678\",\n        \"morada\": \"Nova Morada\",\n        \"foto\": \"url_da_nova_foto.jpg\"\n    }\n}"
+                            "raw": "{\n    \"identificador\": \"normaluser\",\n    \"atributos\": {\n        \"telefone\": \"+351987654321\",\n        \"morada\": \"Nova Morada, 123\"\n    }\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-attributes",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-attributes",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-attributes"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted Change of Restricted Attributes by ENDUSER",
+                    "name": "Admin Updates Any User",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"utilizador123\",\n    \"atributos\": {\n        \"role\": \"ADMIN\"\n    }\n}"
+                            "raw": "{\n    \"identificador\": \"normaluser\",\n    \"atributos\": {\n        \"role\": \"PARTNER\",\n        \"estado\": \"ATIVADA\",\n        \"entidade_empregadora\": \"Nova Empresa S.A.\"\n    }\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-attributes",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "change-attributes"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Change by Unauthorized User",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"identificador\": \"utilizador123\",\n    \"atributos\": {\n        \"nome\": \"Novo Nome\"\n    }\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/change-attributes",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-attributes",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-attributes"]
                         }
                     }
@@ -564,79 +443,29 @@
             ]
         },
         {
-            "name": "Change Password",
+            "name": "OP8 - Change Password",
             "item": [
                 {
-                    "name": "Successful Password Change",
+                    "name": "User Changes Password",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"senha_atual\": \"Exemplo123!\",\n    \"nova_senha\": \"NovaSenha2025!\",\n    \"confirmacao_senha\": \"NovaSenha2025!\"\n}"
+                            "raw": "{\n    \"senha_atual\": \"2024adcAVALind!!!\",\n    \"nova_senha\": \"NovaPassword2024!\",\n    \"confirmacao_senha\": \"NovaPassword2024!\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/change-password",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "change-password"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Change with Incorrect Current Password",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"senha_atual\": \"WrongPassword!\",\n    \"nova_senha\": \"NovaSenha2025!\",\n    \"confirmacao_senha\": \"NovaSenha2025!\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/change-password",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "change-password"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Change with Mismatched New Passwords",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"senha_atual\": \"Exemplo123!\",\n    \"nova_senha\": \"NovaSenha2025!\",\n    \"confirmacao_senha\": \"Different2025!\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/change-password",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/change-password",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "change-password"]
                         }
                     }
@@ -644,54 +473,29 @@
             ]
         },
         {
-            "name": "Logout",
+            "name": "OP9 - Logout",
             "item": [
                 {
-                    "name": "Successful Logout",
+                    "name": "User Logout",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"token\": \"{{token}}\"\n}"
+                            "raw": "{\n    \"token\": \"{{user_token}}\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/logout",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "user", "logout"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Logout with Invalid Token",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer invalidtoken"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"token\": \"invalidtoken\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/user/logout",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/user/logout",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "user", "logout"]
                         }
                     }
@@ -699,112 +503,81 @@
             ]
         },
         {
-            "name": "Create/Modify WorkSheet",
+            "name": "OP10 - Work Sheet Management",
             "item": [
                 {
-                    "name": "Successful Creation by BACKOFFICE",
+                    "name": "Backoffice Creates Work Sheet",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{backoffice_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"referencia_obra\": \"O234/CM/2024\",\n    \"descricao\": \"Obra para reflorestação da propriedade P34567 com registo de parcela de terreno rústico RP-PTR-2459\",\n    \"tipo_alvo\": \"Propriedade Pública\",\n    \"estado_adjudicacao\": \"ADJUDICADO\",\n    \"data_adjudicacao\": \"2024-05-01\",\n    \"data_inicio_prevista\": \"2024-06-01\",\n    \"data_conclusao_prevista\": \"2024-12-01\",\n    \"conta_entidade\": \"PARTNER_12345\",\n    \"entidade_adjudicacao\": \"Reflorestação Inteligente S.A.\",\n    \"nif_empresa\": \"511876234\",\n    \"estado_obra\": \"EM CURSO\",\n    \"observacoes\": \"A obra está a decorrer conforme o previsto.\"\n}"
+                            "raw": "{\n    \"referencia_obra\": \"O234/CM/2024\",\n    \"descricao\": \"Obra para reflorestação da propriedade P34567\",\n    \"tipo_alvo\": \"Propriedade Pública\",\n    \"estado_adjudicacao\": \"ADJUDICADO\",\n    \"data_adjudicacao\": \"2024-05-01\",\n    \"data_inicio_prevista\": \"2024-06-01\",\n    \"data_conclusao_prevista\": \"2024-12-01\",\n    \"conta_entidade\": \"partneruser\",\n    \"entidade_adjudicacao\": \"Reflorestação Inteligente S.A.\",\n    \"nif_empresa\": \"511876234\",\n    \"estado_obra\": \"NÃO INICIADO\",\n    \"observacoes\": \"Obra adjudicada, aguardando início\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/work-sheet/create",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/work-sheet/create",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "work-sheet", "create"]
                         }
                     }
                 },
                 {
-                    "name": "Attempted Creation by Unauthorized User",
+                    "name": "Partner Updates Work Sheet Status",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{partner_token}}"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"referencia_obra\": \"O234/CM/2024\",\n    \"descricao\": \"Obra para reflorestação da propriedade P34567 com registo de parcela de terreno rústico RP-PTR-2459\",\n    \"tipo_alvo\": \"Propriedade Pública\",\n    \"estado_adjudicacao\": \"ADJUDICADO\",\n    \"data_adjudicacao\": \"2024-05-01\",\n    \"data_inicio_prevista\": \"2024-06-01\",\n    \"data_conclusao_prevista\": \"2024-12-01\",\n    \"conta_entidade\": \"PARTNER_12345\",\n    \"entidade_adjudicacao\": \"Reflorestação Inteligente S.A.\",\n    \"nif_empresa\": \"511876234\",\n    \"estado_obra\": \"EM CURSO\",\n    \"observacoes\": \"A obra está a decorrer conforme o previsto.\"\n}"
+                            "raw": "{\n    \"referencia_obra\": \"O234/CM/2024\",\n    \"estado_obra\": \"EM CURSO\",\n    \"observacoes\": \"Obra iniciada conforme planejado\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/work-sheet/create",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "work-sheet", "create"]
-                        }
-                    }
-                },
-                {
-                    "name": "Attempted Modification by PARTNER without Assignment",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"referencia_obra\": \"O234/CM/2024\",\n    \"descricao\": \"Obra para reflorestação da propriedade P34567 com registo de parcela de terreno rústico RP-PTR-2459\",\n    \"tipo_alvo\": \"Propriedade Pública\",\n    \"estado_adjudicacao\": \"ADJUDICADO\",\n    \"data_adjudicacao\": \"2024-05-01\",\n    \"data_inicio_prevista\": \"2024-06-01\",\n    \"data_conclusao_prevista\": \"2024-12-01\",\n    \"conta_entidade\": \"PARTNER_12345\",\n    \"entidade_adjudicacao\": \"Reflorestação Inteligente S.A.\",\n    \"nif_empresa\": \"511876234\",\n    \"estado_obra\": \"EM CURSO\",\n    \"observacoes\": \"A obra está a decorrer conforme o previsto.\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/work-sheet/create",
-                            "host": ["{{baseUrl}}"],
+                            "raw": "{{base_url}}/api/work-sheet/create",
+                            "host": ["{{base_url}}"],
                             "path": ["api", "work-sheet", "create"]
                         }
                     }
                 }
             ]
-        }
-    ],
-    "event": [
-        {
-            "listen": "prerequest",
-            "script": {
-                "type": "text/javascript",
-                "exec": [""]
-            }
-        },
-        {
-            "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [""]
-            }
         }
     ],
     "variable": [
         {
-            "key": "baseUrl",
-            "value": "http://localhost:8080",
-            "type": "string"
+            "key": "base_url",
+            "value": "http://localhost:8080"
         },
         {
-            "key": "token",
-            "value": "",
-            "type": "string"
+            "key": "admin_token",
+            "value": "your_admin_token_here"
+        },
+        {
+            "key": "backoffice_token",
+            "value": "your_backoffice_token_here"
+        },
+        {
+            "key": "user_token",
+            "value": "your_user_token_here"
+        },
+        {
+            "key": "partner_token",
+            "value": "your_partner_token_here"
         }
     ]
 } 
