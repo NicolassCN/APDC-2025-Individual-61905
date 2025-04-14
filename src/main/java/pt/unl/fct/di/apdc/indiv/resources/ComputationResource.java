@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.protobuf.Timestamp;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -34,7 +35,7 @@ public class ComputationResource {
 
 	private static final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
 
-	public ComputationResource() {} 
+	public ComputationResource() {} //nothing to be done here @GET
 
 	@GET
 	@Path("/hello")
@@ -59,9 +60,9 @@ public class ComputationResource {
 	@GET
 	@Path("/compute")
 	public Response triggerExecuteComputeTask() throws IOException {
-		String projectId = "indiv-project-456220";
+		String projectId = "jedi-master-v5-453321";
 		String queueName = "Default";
-		String location = "europe-west1";
+		String location = "europe-west6";
 		LOG.log(Level.INFO, projectId + " :: " + queueName + " :: " + location );
 
 		try (CloudTasksClient client = CloudTasksClient.create()) {
@@ -75,4 +76,18 @@ public class ComputationResource {
 		} 
 		return Response.ok().build();
 	}
+	
+	@POST
+	@Path("/compute")
+	public Response executeComputeTask() {
+		LOG.fine("Starting to execute computation tasks");
+		try {
+			Thread.sleep(60*1000*10); //10 min...
+		} catch(Exception e) {
+			LOG.logp(Level.SEVERE,  this.getClass().getCanonicalName(), "executeComputeTask", "An exception has occured");
+			return Response.serverError().build();
+		} //Simulates 60s execution
+		return Response.ok().build();
+	}
+	
 }

@@ -18,6 +18,7 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+		<jersey.version>3.1.5</jersey.version>
 
 	    <app.deploy.projectId>indiv-project-456220</app.deploy.projectId>
 		<app.deploy.version>1</app.deploy.version>
@@ -59,13 +60,13 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
-			<version>3.1.10</version>
+			<version>${jersey.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>3.1.10</version>
+			<version>${jersey.version}</version>
 		</dependency>
 
 		<dependency>
@@ -78,7 +79,7 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
-			<version>3.1.10</version>
+			<version>${jersey.version}</version>
 		</dependency>
 
 
@@ -91,6 +92,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+			<version>2.10.1</version>
 		</dependency>
 
 		<dependency>
@@ -101,6 +103,7 @@
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-datastore</artifactId>
+			<version>2.21.0</version>
 		</dependency>
 
 		<dependency>
@@ -156,6 +159,21 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>5.11.0</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Jakarta EE Web API -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Apache Commons Codec -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.16.1</version>
 		</dependency>
 
 	</dependencies>

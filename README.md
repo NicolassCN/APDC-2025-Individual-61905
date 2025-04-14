@@ -1,6 +1,97 @@
-# APDC-2025-Individual-61905
+# APDC Individual Project
 
-Projeto individual para a disciplina de ADC (2024/25).
+This project is a RESTful web service built with Java and Google App Engine, implementing user management and authentication functionality.
+
+## Features
+
+- User registration and authentication
+- Role-based access control
+- Token-based authentication
+- User management (list, update, delete)
+- Role and state management for users
+- Secure password handling with SHA-512 hashing
+
+## Technologies Used
+
+- Java 21
+- Google App Engine (Standard Environment)
+- Google Cloud Datastore
+- Jersey (JAX-RS implementation)
+- Maven
+- Gson for JSON processing
+- Apache Commons Codec for hashing
+
+## Prerequisites
+
+- Java Development Kit (JDK) 21
+- Apache Maven
+- Google Cloud SDK
+- A Google Cloud Platform project with the following APIs enabled:
+  - App Engine Admin API
+  - Cloud Datastore API
+  - Cloud Build API
+
+## Setup and Deployment
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <project-directory>
+   ```
+
+2. Configure your Google Cloud project:
+   ```bash
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+
+3. Update the `pom.xml` file with your Google Cloud project ID:
+   ```xml
+   <configuration>
+       <projectId>YOUR_PROJECT_ID</projectId>
+   </configuration>
+   ```
+
+4. Build the project:
+   ```bash
+   mvn clean package
+   ```
+
+5. Deploy to Google App Engine:
+   ```bash
+   mvn appengine:deploy
+   ```
+
+## API Endpoints
+
+### Authentication
+- `POST /rest/auth/register` - Register a new user
+- `POST /rest/auth/login` - Login and get authentication token
+- `POST /rest/auth/logout` - Logout and invalidate token
+
+### User Management
+- `GET /rest/user/listusers` - List users (requires authentication)
+- `POST /rest/user/changerole` - Change user role (requires ADMIN/BACKOFFICE)
+- `POST /rest/user/changestate` - Change user state (requires ADMIN/BACKOFFICE)
+- `DELETE /rest/user/{username}` - Delete user (requires ADMIN/BACKOFFICE)
+
+## Default Admin Account
+
+On first deployment, a root admin account is created with the following credentials:
+- Username: root
+- Password: password123
+
+**Important**: Change the password immediately after first login.
+
+## Security Notes
+
+- All passwords are hashed using SHA-512 before storage
+- Authentication tokens expire after 1 hour
+- HTTPS is enforced for all endpoints
+- Role-based access control is strictly enforced
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
 ## Estrutura do Projeto
 

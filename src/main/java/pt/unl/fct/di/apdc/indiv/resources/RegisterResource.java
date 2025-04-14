@@ -1,103 +1,99 @@
 package pt.unl.fct.di.apdc.indiv.resources;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery;
-import com.google.gson.Gson;
+import com.google.cloud.datastore.Transaction;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pt.unl.fct.di.apdc.indiv.util.User;
-import pt.unl.fct.di.apdc.indiv.util.UserValidator;
+import jakarta.ws.rs.core.Response.Status;
+import pt.unl.fct.di.apdc.indiv.util.RegisterData;
 
 @Path("/register")
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RegisterResource {
-    private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
-    private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-    private final Gson g = new Gson();
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response register(User user) {
-        LOG.fine("Register attempt for user: " + user.getUsername());
+	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-        UserValidator.ValidationResult validationResult = UserValidator.validateUser(user);
-        if (!validationResult.isValid()) {
-            LOG.warning("Registration attempt with invalid data: " + validationResult.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(g.toJson(validationResult.getMessage()))
-                    .build();
-        }
+	public RegisterResource() {}
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(user.getUsername());
-        Entity existingUser = datastore.get(userKey);
-        if (existingUser != null) {
-            LOG.warning("Registration attempt with existing username: " + user.getUsername());
-            return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Username already exists"))
-                    .build();
-        }
+	@POST
+	@Path("/")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response registerUser(RegisterData data, @Context HttpServletRequest request) {
+		LOG.info("Received registration attempt for user: " + (data != null ? data.getUsername() : "null data object"));
 
-        Query<Entity> query = Query.newEntityQueryBuilder()
-                .setKind("User")
-                .setFilter(StructuredQuery.PropertyFilter.eq("email", user.getEmail()))
-                .build();
-        QueryResults<Entity> results = datastore.run(query);
-        if (results.hasNext()) {
-            LOG.warning("Registration attempt with existing email: " + user.getEmail());
-            return Response.status(Response.Status.CONFLICT)
-                    .entity(g.toJson("Email already in use"))
-                    .build();
-        }
+		if (data == null) {
+			LOG.warning("Validation failed: Received null data object.");
+			return Response.status(Status.BAD_REQUEST).entity("Invalid registration data: No data provided.").build();
+		}
 
-        // Save user to datastore
-        Entity userEntity = user.toEntity(userKey);
-        datastore.put(userEntity);
+		if (!data.validRegistration()) {
+			LOG.warning("Validation failed for user: " + data.getUsername());
+			return Response.status(Status.BAD_REQUEST)
+						 .entity("Registration validation failed. Please check all fields.")
+						 .build();
+		}
 
-        LOG.info("User registered successfully: " + user.getUsername());
-        return Response.ok(g.toJson("User registered successfully")).build();
-    }
+		LOG.info("Validation passed for user: " + data.getUsername());
 
-    @GET
-    @Path("/check/{username}")
-    public Response checkUsernameAvailable(@PathParam("username") String username) {
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(username);
-        Entity user = datastore.get(userKey);
-        return Response.ok(g.toJson(user == null)).build();
-    }
+		Transaction txn = datastore.newTransaction();
+		try {
+			Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
+			Entity user = txn.get(userKey);
 
-    
-    public static void createRootUser(Datastore datastore) {
-        Key rootKey = datastore.newKeyFactory().setKind("User").newKey("root");
-        Entity rootUser = datastore.get(rootKey);
-        
-        if (rootUser == null) {
-            User root = new User();
-            root.setUsername("root");
-            root.setPassword("2025adcAVALind!!!"); 
-            root.setEmail("root@fct.unl.pt");
-            root.setFullName("Root Administrator");
-            root.setPhone("+3512895629");
-            root.setProfile("private");
-            root.setRole("ADMIN");
-            root.setAccountState("ACTIVE");
-            
-            Entity rootEntity = root.toEntity(rootKey);
-            datastore.put(rootEntity);
-            LOG.info("Root user created successfully");
-        }
-    }
-} 
+			if (user != null) {
+				txn.rollback();
+				LOG.warning("Registration failed: Username " + data.getUsername() + " already exists.");
+				return Response.status(Status.CONFLICT).entity("Username already exists.").build();
+			} else {
+				user = Entity.newBuilder(userKey)
+						.set("user_name", data.getName())
+						.set("user_pwd", data.getHashedPassword())
+						.set("user_email", data.getEmail())
+						.set("user_phone", data.getPhone())
+						.set("user_profile", data.getProfile().toLowerCase())
+						.set("user_role", "ENDUSER")
+						.set("user_state", "DESATIVADA")
+						.set("user_creation_time", Timestamp.of(java.util.Date.from(data.getRegistrationTime())))
+						.set("user_client_ip", data.getClientIP())
+						.set("user_agent", data.getUserAgent())
+						.build();
+
+				txn.put(user);
+				txn.commit();
+				LOG.info("User registered successfully: " + data.getUsername());
+				return Response.ok().entity("User registered successfully.").build();
+			}
+		} catch (DatastoreException e) {
+			if (txn.isActive()) txn.rollback();
+			LOG.log(Level.SEVERE, "Datastore error during registration for user: " + data.getUsername(), e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+						 .entity("Datastore error: " + e.getMessage())
+						 .build();
+		} catch (Exception e) {
+			if (txn.isActive()) txn.rollback();
+			LOG.log(Level.SEVERE, "Unexpected error during registration for user: " + data.getUsername(), e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+						 .entity("Unexpected error: " + e.getMessage())
+						 .build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				LOG.warning("Transaction was still active in finally block for user: " + data.getUsername() + "; rolling back.");
+			}
+		}
+	}
+}
